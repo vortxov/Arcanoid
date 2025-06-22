@@ -26,7 +26,7 @@ void Bonus::SetRandomBonusType(int randomBonusType)
 
 void Bonus::update(float deltaTime)
 {
-	sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + deltaTime * 100.f);
+	sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + 100.f * deltaTime);
 
 	sprite_.setPosition(newPosition);
 }
