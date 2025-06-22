@@ -1,59 +1,70 @@
 #include "Bonus.h"
+#include <assert.h>
+
+#include "Constants.h"
 
 void Bonus::SetRandomBonusType(int randomBonusType)
 {
-    if (randomBonusType < 0 || randomBonusType > 2) {
-        return;
-    }
+	if (randomBonusType < 0 || randomBonusType > 2)
+	{
+		return;
+	}
 
-    if (randomBonusType == 0) {
-        bonusType = BonusType::BrittleBrick;
-    }
-    else if (randomBonusType == 1) {
-        bonusType = BonusType::FireBall;
-    }
-    else if (randomBonusType == 2) {
-        bonusType = BonusType::BoostPlatformSpeed;
-    }
+	if (randomBonusType == 0)
+	{
+		bonusType = BonusType::BrittleBrick;
+	}
+	else if (randomBonusType == 1)
+	{
+		bonusType = BonusType::FireBall;
+	}
+	else if (randomBonusType == 2)
+	{
+		bonusType = BonusType::BoostPlatformSpeed;
+	}
 }
-
 
 void Bonus::update(float deltaTime)
 {
-    sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + deltaTime * 100.f);
+	sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + deltaTime * 100.f);
 
-    sprite_.setPosition(newPosition);
+	sprite_.setPosition(newPosition);
 }
 
 void Bonus::draw(sf::RenderWindow window)
 {
-    window.draw(sprite_);
+	window.draw(sprite_);
 }
 
 sf::FloatRect Bonus::getBounds() const
 {
-    return sprite_.getGlobalBounds();
+	return sprite_.getGlobalBounds();
 }
 
 void Bonus::initBonus(const sf::Vector2f& brickPosition)
 {
-    switch (bonusType)
-    {
-    case BonusType::BrittleBrick:
-        texture.loadFromFile("resources/textures/glassblocks_bonus.png");
-        break;
-    case BonusType::FireBall:
-        texture.loadFromFile("resources/textures/fireball_bonus.png");
-        break;
-    case BonusType::BoostPlatformSpeed:
-        texture.loadFromFile("resources/textures/random_bonus.png"); //TODO: ������ ���������
-        break;
-    default:
-        break;
-    }
-    sprite_.setTexture(texture);
+	switch (bonusType)
+	{
+		case BonusType::BrittleBrick:
+		{
+			assert(texture.loadFromFile("resources/textures/glassblocks_bonus.png"));
+			break;
+		}
+		case BonusType::FireBall:
+		{
+			assert(texture.loadFromFile("resources/textures/fireball_bonus.png"));
+			break;
+		}
+		case BonusType::BoostPlatformSpeed:
+		{
+			assert(texture.loadFromFile("resources/textures/platform_bonus.png"));	// TODO: Другую текстурку
+			break;
+		}
+		default:
+			break;
+	}
 
-    sprite_.setPosition(brickPosition);
-
-    
+	sprite_.setScale(sf::Vector2f(SCALE_GAME, SCALE_GAME));
+	sprite_.setTexture(texture);
+	sprite_.setPosition(brickPosition);
 }

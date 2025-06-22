@@ -46,7 +46,7 @@ void GameState::initialize()
 
 void GameState::loadResources()
 {
-	// ���������� �������� �������
+	// Глобальный менеджер текстур
 	textureManager.load("background", "resources/textures/background.png");
 	textureManager.load("ball", "resources/textures/ball.png");
 	textureManager.load("platform", "resources/textures/platform.png");
@@ -54,7 +54,7 @@ void GameState::loadResources()
 	textureManager.load("brick_strong", "resources/textures/brick_strong.png");
 	textureManager.load("brick_glass", "resources/textures/brick_glass.png");
 
-	// �������� �������
+	// Загрузка текстур
 	if (!font_.loadFromFile("resources/fonts/arial.ttf"))
 	{
 		throw std::runtime_error("Failed to load font");
@@ -63,17 +63,17 @@ void GameState::loadResources()
 
 void GameState::initGameObjects()
 {
-	// ��������� �������� ������� ����
+	// Установка текстуры заднего фона
 	background_.setTexture(textureManager.get("background"));
-	background_.setColor(sf::Color::White);	 // ����� ���� ��� ����������
+	background_.setColor(sf::Color::White);	 // Белый цвет без затемнения
 
-	// ��������� �������� ������� ����
+	// Установка текстуры заднего фона
 	ball_->setPosition(400, 500);
 	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
 	ball_->setTexture(textureManager.get("ball"));
-	ball_->setColor(sf::Color::White);	// ���� ���� � �����
+	ball_->setColor(sf::Color::White);	// Цвет мяча — белый
 
-	// ������������� ��������
+	// Инициализация кирпичей
 	platform_->setPosition(350, 550);
 	platform_->setTexture(textureManager.get("platform"));
 
@@ -115,14 +115,14 @@ void GameState::setupWindow()
 
 void GameState::setupText()
 {
-	// ��������� ������ "�� ���������"
+	// Настройка текста "Вы проиграли"
 	loseText_.setFont(font_);
 	loseText_.setCharacterSize(40);
 	loseText_.setFillColor(sf::Color::White);
 	loseText_.setString("Game Over!\nTry again?\n(Space - Yes, Esc - No)");
 	centerText(loseText_);
 
-	// ��������� ������ ������
+	// Настройка текста победы
 	winText_.setFont(font_);
 	winText_.setCharacterSize(40);
 	winText_.setFillColor(sf::Color::White);
@@ -176,12 +176,13 @@ void GameState::handleEvents()
 	}
 }
 
-void GameState::update(float deltaTime) {
-    handleInput();
-    updateBall(deltaTime);
-    updateBallSpeed(deltaTime);
-    checkGameConditions();
-    updateBonus(deltaTime);
+void GameState::update(float deltaTime)
+{
+	handleInput();
+	updateBall(deltaTime);
+	updateBallSpeed(deltaTime);
+	checkGameConditions();
+	updateBonus(deltaTime);
 }
 
 void GameState::handleInput()
@@ -230,7 +231,7 @@ void GameState::updateBallSpeed(float deltaTime)
 		ballSpeedChangeTimer_ = 0.f;
 		currentBallSpeedMultiplier_ = std::min(maxBallSpeedMultiplier_, currentBallSpeedMultiplier_ * 1.05f);
 
-		// ������� ������� ���� �������������� ��������
+		// Масштаб спрайта мяча пропорционален скорости
 		float ratio = (currentBallSpeedMultiplier_ - minBallSpeedMultiplier_) / (maxBallSpeedMultiplier_ - minBallSpeedMultiplier_);
 		float scale = 1.0f + ratio * 0.2f;
 		const_cast<sf::Sprite&>(ball_->getSprite()).setScale(scale, scale);
@@ -239,9 +240,10 @@ void GameState::updateBallSpeed(float deltaTime)
 	}
 }
 
-void GameState::initBricks() {
-    bricks_.clear();
-    bonuses_.clear();
+void GameState::initBricks()
+{
+	bricks_.clear();
+	bonuses_.clear();
 
 	static constexpr int rows = 5;
 	static constexpr int cols = 8;
@@ -255,42 +257,54 @@ void GameState::initBricks() {
 
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
 
+	// 1. Создаём список всех возможных позиций
+	std::vector<sf::Vector2f> positions;
 	for (int row = 0; row < rows; ++row)
 	{
 		for (int col = 0; col < cols; ++col)
 		{
-			std::unique_ptr<Block> brick;
-
-			// ������ ���� �������� � ����������� �� �������
-			if (row == 0 && col % 3 == 0)
-			{
-				brick = std::make_unique<StrongBrick>();
-				brick->setTexture(textureManager.get("brick_strong"));
-			}
-			else if (row == 2 && col % 4 == 0)
-			{
-				brick = std::make_unique<GlassBrick>();
-				brick->setTexture(textureManager.get("brick_glass"));
-			}
-			else
-			{
-				brick = std::make_unique<NormalBrick>();
-				brick->setTexture(textureManager.get("brick_normal"));
-			}
-
-			// 10% шанс выдать бонус
-			if (std::rand() % 10 == 0)
-			{
-				int bonusType = std::rand() % 3;
-				brick->SetRandomBonus(bonusType);
-			}
-
 			float x = startX + col * (brickWidth + spacing);
 			float y = startY + row * (brickHeight + spacing);
-			brick->setPosition(x, y);
-
-			bricks_.push_back(std::move(brick));
+			positions.emplace_back(x, y);
 		}
+	}
+
+	// 2. Перемешиваем позиции
+	std::random_shuffle(positions.begin(), positions.end());
+
+	// 3. Создаём кирпичи и ставим их на случайные позиции
+	int totalBricks = rows * cols;
+	for (int i = 0; i < totalBricks; ++i)
+	{
+		std::unique_ptr<Block> brick;
+
+		// Рандомный тип кирпича
+		int typeChance = std::rand() % 100;
+		if (typeChance < BONUS_BRICK_STRONG_PERCENT)  // 10% - Strong
+		{
+			brick = std::make_unique<StrongBrick>();
+			brick->setTexture(textureManager.get("brick_strong"));
+		}
+		else if (typeChance < BONUS_BRICK_GLASS_PERCENT)  // 25% - Glass
+		{
+			brick = std::make_unique<GlassBrick>();
+			brick->setTexture(textureManager.get("brick_glass"));
+		}
+		else  // 65% - Normal
+		{
+			brick = std::make_unique<NormalBrick>();
+			brick->setTexture(textureManager.get("brick_normal"));
+		}
+
+		// Шанс на бонус
+		if (std::rand() % 100 < BONUS_DROP_CHANCE_PERCENT)
+		{
+			int bonusType = std::rand() % 3;
+			brick->SetRandomBonus(bonusType);
+		}
+
+		brick->setPosition(positions[i].x, positions[i].y);
+		bricks_.push_back(std::move(brick));
 	}
 }
 
@@ -306,37 +320,37 @@ void GameState::checkWallCollisions()
 	sf::Vector2f ballPos = ball_->getPosition();
 	float radius = ball_->getRadius();
 
-	// ������ �� ����� � ������ ������ ������
+	// Отскок от левой и правой границ экрана
 	if (ballPos.x - radius <= 0 || ballPos.x + radius >= SCREEN_WIDTH)
 	{
-		ball_->reverseX();	// �������� ����������� �� ��� X
+		ball_->reverseX();	// Изменить направление по оси X
 	}
 
-	// ������ �� ������� �������
+	// Отскок от верхней границы
 	if (ballPos.y - radius <= 0)
 	{
-		ball_->reverseY();	// �������� ����������� �� ��� Y
+		ball_->reverseY();	// Изменить направление по оси Y
 	}
 }
 
 void GameState::checkPlatformCollision()
-{  // TODO: ????? ???????????????
-	// �������� �� ����������� ���� � ���������
+{
+	// Проверка на пересечение мяча и платформы
 	if (ball_->getGlobalBounds().intersects(platform_->getGlobalBounds()))
 	{
 		sf::Vector2f platformPos = platform_->getPosition();
 
-		// ����� ���������
+		// Центр платформы
 		float platformCenter = platformPos.x + platform_->getGlobalBounds().width / 2;
 
-		// ��������� ������ ����� ����� �� ������ ��������� (-1 ... 1)
+		// Насколько далеко точка удара от центра платформы (-1 ... 1)
 		float hitPos = (ball_->getPosition().x - platformCenter) / (platform_->getGlobalBounds().width / 2);
 
-		// ������� ������ ����������� ������� �������� ����
+		// Задание нового направления вектора скорости мяча
 		sf::Vector2f newVel;
 		newVel.x = hitPos * 300.f;
 
-		// ����������� ���������� ����� �������� (300), �������� y ����� ������� ��������
+		// Поддержание постоянной длины скорости (300), вычисляя y через теорему Пифагора
 		newVel.y = -sqrt(300.f * 300.f - newVel.x * newVel.x);
 
 		ball_->setVelocity(newVel);
@@ -347,12 +361,12 @@ void GameState::checkBrickCollisions()
 {
 	for (auto& brick : bricks_)
 	{
-		// ���� ������ ��� �� �������� � ���� ������������ � �����
+		// Если кирпич ещё не разрушен и есть столкновение с мячом
 		if (!brick->isDestroyed() && ball_->getGlobalBounds().intersects(brick->getBounds()))
 		{
-			brick->hit();  // ��������� �������� ��� ����������
+			brick->hit();  // Уменьшить здоровье или уничтожить
 
-			// ���������� ����� � ����������� �� ���� �������
+			// Начисление очков в зависимости от типа кирпича
 			if (brick->isDestroyed())
 			{
 				if (dynamic_cast<NormalBrick*>(brick.get()))
@@ -368,16 +382,16 @@ void GameState::checkBrickCollisions()
 					scoreSystem_.addScore(ScoreSystem::BrickType::Glass);
 				}
 
-				pushBonus(*brick);	// ��������� ������ �� �������
+				pushBonus(*brick);	// Выпадение бонуса из кирпича
 			}
 
-			// ��������� ������� �� �������, ���� ��� �����
+			// Обработка отскока от кирпича, если это нужно
 			if (brick->shouldBallBounce())
 			{
 				handleBrickCollisionResponse(*brick);
 			}
 
-			break;	// ���� ������ �� ����
+			break;	// Один отскок за кадр
 		}
 	}
 }
@@ -386,51 +400,49 @@ void GameState::pushBonus(Block& brick)
 {
 	if (brick.GetBonus().GetBonusType() == BonusType::None)
 	{
-		return;	 // ��� ������ � ������ �� ������
+		return;	 // Нет бонуса — ничего не делать
 	}
 
-	// ��������� ������� ������ � ����� �������
+	// Начальная позиция бонуса — центр кирпича
 	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition().x + 25.f, brick.getSprite().getPosition().y + 15.f);
 
-	// ������������� ������ � ���������� � ������ ��������
+	// Инициализация бонуса и добавление в список активных
 	brick.GetBonus().initBonus(brickPosition);
 	bonuses_.push_back(brick.GetBonus());
 }
 
 void GameState::updateBonus(float deltaTime)
 {
-    for (auto& bonus : bonuses_) {
-        bonus.update(deltaTime);
-
-    }
-    checkBonusPlatformCollision();
+	for (auto& bonus : bonuses_)
+	{
+		bonus.update(deltaTime);
+	}
+	checkBonusPlatformCollision();
 }
 
 void GameState::clearBonus()
 {
-    bonuses_.clear();
+	bonuses_.clear();
 }
-
-
 
 void GameState::handleBrickCollisionResponse(const Block& brick)
 {
 	sf::FloatRect ballBounds = ball_->getGlobalBounds();
 	sf::FloatRect brickBounds = brick.getBounds();
 
-	// ��������� ������� ���������� � ������ �������
+	// Вычисляем степень перекрытия с каждой стороны
 	float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
 	float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
 	float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
 	float overlapBottom = brickBounds.top + brickBounds.height - ballBounds.top;
 
-	// ����������� ������� �����
+	// Определение стороны удара
 	bool fromLeft = overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom;
 	bool fromRight = overlapRight < overlapLeft && overlapRight < overlapTop && overlapRight < overlapBottom;
 	bool fromTop = overlapTop < overlapLeft && overlapTop < overlapRight && overlapTop < overlapBottom;
 	bool fromBottom = overlapBottom < overlapLeft && overlapBottom < overlapRight && overlapBottom < overlapTop;
 
-	// ����������� ��������������� ���������� ������� ��������
+	// Инвертируем соответствующую компоненту вектора скорости
 	if (fromLeft || fromRight)
 		ball_->reverseX();
 	if (fromTop || fromBottom)
@@ -439,19 +451,12 @@ void GameState::handleBrickCollisionResponse(const Block& brick)
 
 void GameState::checkBonusPlatformCollision()
 {
-  /*  for (auto& bonus : bonuses_) {
-        if (bonus.sprite_.getGlobalBounds().intersects(platform_->getGlobalBounds())) {
-            bonuses_.delete
-        }*/
-
-        bonuses_.erase(
-            std::remove_if(bonuses_.begin(), bonuses_.end(),
-                [&](const Bonus& bonus) {
-                    return bonus.sprite_.getGlobalBounds().intersects(platform_->getGlobalBounds());
-                }),
-            bonuses_.end());
-
-    
+	bonuses_.erase(
+		std::remove_if(bonuses_.begin(), bonuses_.end(),
+			[&](const Bonus& bonus) {
+				return bonus.sprite_.getGlobalBounds().intersects(platform_->getGlobalBounds());
+			}),
+		bonuses_.end());
 }
 
 void GameState::checkGameConditions() 
@@ -462,7 +467,7 @@ void GameState::checkGameConditions()
 
 void GameState::checkLoseCondition()
 {
-	// ���� ��� ������ ���� ������ � ���������
+	// Если мяч улетел ниже экрана — поражение
 	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT)
 	{
 		gameLost_ = true;
@@ -471,7 +476,7 @@ void GameState::checkLoseCondition()
 
 void GameState::checkWinCondition()
 {
-	// ������, ���� ��� ������� ����������
+	// Победа, если все кирпичи уничтожены
 	bool allDestroyed = std::all_of(bricks_.begin(), bricks_.end(),
 		[](const auto& brick) { return brick->isDestroyed(); });
 
@@ -485,30 +490,30 @@ void GameState::render()
 {
 	window_->clear();
 
-	// ��������� ����
+	// Отрисовка фона
 	window_->draw(background_);
 
-	// ��������� �����
+	// Отрисовка счёта
 	window_->draw(scoreText_);
 	window_->draw(highscoreText_);
 
-	// ��������� ���� ��������
+	// Отрисовка всех кирпичей
 	for (const auto& brick : bricks_)
 	{
 		brick->draw(*window_);
 	}
 
-	// ��������� �������
+	// Отрисовка бонусов
 	for (const Bonus& temp : bonuses_)
 	{
 		window_->draw(temp.sprite_);
 	}
 
-	// ��������� ��������� � ����
+	// Отрисовка платформы и мяча
 	window_->draw(platform_->getSprite());
 	window_->draw(ball_->getSprite());
 
-	// ��������� ������ ������/���������, ���� �����
+	// Отрисовка текста победы/поражения, если нужно
 	if (gameWon_)
 		window_->draw(winText_);
 	if (gameLost_)
@@ -539,11 +544,11 @@ void GameState::handleWinScreenInput()
 		{
 			if (event.key.code == sf::Keyboard::Space)
 			{
-				resetGame();  // ������������� ����
+				resetGame();  // Перезапустить игру
 			}
 			else if (event.key.code == sf::Keyboard::Escape)
 			{
-				window_->close();  // ����� �� ����
+				window_->close();  // Выйти из игры
 			}
 		}
 	}
@@ -571,11 +576,11 @@ void GameState::handleLoseScreenInput()
 		{
 			if (event.key.code == sf::Keyboard::Space)
 			{
-				resetGame();  // ������������� ����
+				resetGame();  // Перезапустить игру
 			}
 			else if (event.key.code == sf::Keyboard::Escape)
 			{
-				window_->close();  // ������� ����
+				window_->close();  // Закрыть окно
 			}
 		}
 	}
@@ -583,20 +588,20 @@ void GameState::handleLoseScreenInput()
 
 void GameState::resetGame()
 {
-	// ����� ������
+	// Сброс флагов
 	gameWon_ = false;
 	gameLost_ = false;
 	currentBallSpeedMultiplier_ = 1.0f;
 	ballSpeedChangeTimer_ = 0.0f;
 
-	// ����������������� ����
+	// Переинициализация мяча
 	ball_->reset(400, 500);
 	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
 	ball_->setColor(sf::Color::White);
 
-	// ����� ������� ���������
+	// Сброс позиции платформы
 	platform_->setPosition(350, 550);
 
-	// ������������ ��������
+	// Пересоздание кирпичей
 	initBricks();
 }
