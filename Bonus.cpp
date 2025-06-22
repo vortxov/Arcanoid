@@ -35,7 +35,7 @@ void Bonus::initBonus(const sf::Vector2f& brickPosition)
         texture.loadFromFile("resources/textures/fireball_bonus.png");
         break;
     case BonusType::BoostPlatformSpeed:
-        texture.loadFromFile("resources/textures/random_bonus.png"); //TODO: Другую текстурку
+        texture.loadFromFile("resources/textures/random_bonus.png"); //TODO: пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         break;
     default:
         break;

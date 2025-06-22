@@ -1,7 +1,8 @@
-#include "Application.h"
+#include "GameState.h"
 
-int main() {
-    Application app;
-    app.run();
-    return 0;
+int main()
+{
+	GameState gameState(SCREEN_WIDTH, SCREEN_WIDTH);
+	gameState.run();
+	return 0;
 }

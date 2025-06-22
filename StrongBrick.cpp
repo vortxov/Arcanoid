@@ -6,7 +6,7 @@ StrongBrick::StrongBrick() {
 
 void StrongBrick::hit() {
     Block::hit();
-    // Дополнительная логика при ударе
+    // Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅР°СЏ Р»РѕРіРёРєР° РїСЂРё СѓРґР°СЂРµ
 }
 
 bool StrongBrick::shouldBallBounce() const {

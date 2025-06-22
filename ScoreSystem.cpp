@@ -20,8 +20,8 @@ void ScoreSystem::saveToHighscores() {
     std::sort(highscores_.rbegin(), highscores_.rend());
     if (highscores_.size() > 5) highscores_.resize(5);
 
-    // Сохранение в файл
-    std::ofstream file("highscores.txt"); //TODO: убрать 5 одинаковых сохранений
+    // РЎРѕС…СЂР°РЅРµРЅРёРµ РІ С„Р°Р№Р»
+    std::ofstream file("highscores.txt"); //TODO: СѓР±СЂР°С‚СЊ 5 РѕРґРёРЅР°РєРѕРІС‹С… СЃРѕС…СЂР°РЅРµРЅРёР№
     for (int score : highscores_) {
         file << score << "\n";
     }

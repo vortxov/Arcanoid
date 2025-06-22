@@ -132,10 +132,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Application.h" />
     <ClInclude Include="Ball.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Bonus.h" />
+    <ClInclude Include="Constants.h" />
     <ClInclude Include="GlassBrick.h" />
     <ClInclude Include="NormalBrick.h" />
     <ClInclude Include="GameObject.h" />
@@ -146,7 +146,6 @@
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Application.cpp" />
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bonus.cpp" />
@@ -158,6 +157,9 @@
     <ClCompile Include="ScoreSystem.cpp" />
     <ClCompile Include="StrongBrick.cpp" />
     <ClCompile Include="TextureManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".clang-format" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
