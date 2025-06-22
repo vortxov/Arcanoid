@@ -36,11 +36,11 @@ private:
 	void handleInput();							  // Обработка клавиш
 	void clampPlatformPosition();				  // Ограничение движения платформы
 	void updateBall(float deltaTime);			  // Обновление позиции мяча
-	void updateBallSpeed(float deltaTime);		  // Управление изменением скорости мяча
-	void initBricks();							  // Создание и размещение кирпичей
-	void pushBonus(Block& brick);				  // Добавление бонуса при разрушении кирпича
-	void updateBonus(float deltaTime);			  // Обновление положения и состояния бонусов
-	void clearBonus();							  // Очистка всех активных бонусов
+	// void AccelerationBallSpeed(float deltaTime);  // Управление изменением скорости мяча // Not used
+	void initBricks();					// Создание и размещение кирпичей
+	void pushBonus(Block& brick);		// Добавление бонуса при разрушении кирпича
+	void updateBonus(float deltaTime);	// Обновление положения и состояния бонусов
+	void clearBonus();					// Очистка всех активных бонусов
 
 	// === Коллизии ===
 	void checkCollisions();									// Общая проверка всех коллизий
@@ -48,7 +48,7 @@ private:
 	void checkPlatformCollision();							// Коллизия мяча с платформой
 	void checkBrickCollisions();							// Коллизия мяча с кирпичами
 	void handleBrickCollisionResponse(const Block& brick);	// Ответная реакция на столкновение с кирпичом
-	void checkBonusPlatformCollision();						// Коллизия бонусов с платформой
+	// void checkBonusWithPlatformCollision();					// Коллизия бонусов с платформой
 
 	// === Проверка условий завершения игры ===
 	void checkGameConditions();	 // Проверка: выигрыш или проигрыш

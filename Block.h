@@ -29,6 +29,6 @@ public:
     sf::Sprite getSprite() { return sprite_; };
 
     virtual void draw(sf::RenderWindow& window) const;
-    sf::FloatRect getBounds() const;
+    sf::FloatRect getGlobalBounds() const;
 
 };
