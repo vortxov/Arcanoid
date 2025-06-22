@@ -8,7 +8,6 @@
 #include "GlassBrick.h"
 #include "NormalBrick.h"
 
-// ????????????? ???????????? ?????
 TextureManager GameState::textureManager;
 
 GameState::GameState(unsigned int width, unsigned int height)
@@ -49,7 +48,11 @@ void GameState::loadResources()
 	// Глобальный менеджер текстур
 	textureManager.load("background", "resources/textures/background.png");
 	textureManager.load("ball", "resources/textures/ball.png");
+	textureManager.load("fireball", "resources/textures/fireball.png");
+	textureManager.load("fireball_bonus", "resources/textures/fireball_bonus.png");
+	textureManager.load("glass_blocks_bonus", "resources/textures/glass_blocks_bonus.png");
 	textureManager.load("platform", "resources/textures/platform.png");
+	textureManager.load("platform_bonus", "resources/textures/platform_bonus.png");
 	textureManager.load("brick_normal", "resources/textures/brick_normal.png");
 	textureManager.load("brick_strong", "resources/textures/brick_strong.png");
 	textureManager.load("brick_glass", "resources/textures/brick_glass.png");
@@ -71,7 +74,6 @@ void GameState::initGameObjects()
 	ball_->setPosition(400, 500);
 	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
 	ball_->setTexture(textureManager.get("ball"));
-	ball_->setColor(sf::Color::White);	// Цвет мяча — белый
 
 	// Инициализация кирпичей
 	platform_->setPosition(350, 550);
@@ -181,7 +183,7 @@ void GameState::update(float deltaTime)
 {
 	handleInput();
 	updateBall(deltaTime);
-	updateBallSpeed(deltaTime);
+	// AccelerationBallSpeed(deltaTime); // Not used
 	checkGameConditions();
 	updateBonus(deltaTime);
 }
@@ -223,23 +225,24 @@ void GameState::updateBall(float deltaTime)
 	checkCollisions();
 }
 
-void GameState::updateBallSpeed(float deltaTime)
-{
-	ballSpeedChangeTimer_ += deltaTime;
-
-	if (ballSpeedChangeTimer_ >= ballSpeedChangeInterval_)
-	{
-		ballSpeedChangeTimer_ = 0.f;
-		currentBallSpeedMultiplier_ = std::min(maxBallSpeedMultiplier_, currentBallSpeedMultiplier_ * 1.05f);
-
-		// Масштаб спрайта мяча пропорционален скорости
-		float ratio = (currentBallSpeedMultiplier_ - minBallSpeedMultiplier_) / (maxBallSpeedMultiplier_ - minBallSpeedMultiplier_);
-		float scale = 1.0f + ratio * 0.2f;
-		const_cast<sf::Sprite&>(ball_->getSprite()).setScale(scale, scale);
-
-		ball_->setSpeedMultiplier(currentBallSpeedMultiplier_);
-	}
-}
+// Not used
+// void GameState::AccelerationBallSpeed(float deltaTime)
+// {
+// 	ballSpeedChangeTimer_ += deltaTime;
+//
+// 	if (ballSpeedChangeTimer_ >= ballSpeedChangeInterval_)
+// 	{
+// 		ballSpeedChangeTimer_ = 0.f;
+// 		currentBallSpeedMultiplier_ = std::min(maxBallSpeedMultiplier_, currentBallSpeedMultiplier_ * 1.05f);
+//
+// 		// Масштаб спрайта мяча пропорционален скорости
+// 		float ratio = (currentBallSpeedMultiplier_ - minBallSpeedMultiplier_) / (maxBallSpeedMultiplier_ - minBallSpeedMultiplier_);
+// 		float scale = 1.0f + ratio * 0.2f;
+// 		const_cast<sf::Sprite&>(ball_->getSprite()).setScale(scale, scale);
+//
+// 		ball_->setSpeedMultiplier(currentBallSpeedMultiplier_);
+// 	}
+// }
 
 void GameState::initBricks()
 {
@@ -363,7 +366,7 @@ void GameState::checkBrickCollisions()
 	for (auto& brick : bricks_)
 	{
 		// Если кирпич ещё не разрушен и есть столкновение с мячом
-		if (!brick->isDestroyed() && ball_->getGlobalBounds().intersects(brick->getBounds()))
+		if (!brick->isDestroyed() && ball_->getGlobalBounds().intersects(brick->getGlobalBounds()))
 		{
 			brick->hit();  // Уменьшить здоровье или уничтожить
 
@@ -405,7 +408,7 @@ void GameState::pushBonus(Block& brick)
 	}
 
 	// Начальная позиция бонуса — центр кирпича
-	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition().x + 25.f, brick.getSprite().getPosition().y + 15.f);
+	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition().x, brick.getSprite().getPosition().y);
 
 	// Инициализация бонуса и добавление в список активных
 	brick.GetBonus().initBonus(brickPosition);
@@ -417,8 +420,32 @@ void GameState::updateBonus(float deltaTime)
 	for (auto& bonus : bonuses_)
 	{
 		bonus.update(deltaTime);
+		if (bonus.checkBonusWithPlatformCollision(platform_))
+		{
+			// Очищаем таймер, когда пересеклись с платформой
+			bonus.GetBonusDurationTimer().restart();
+		};
+
+		if (bonus.GetBonusType() == BonusType::FireBall)
+		{
+			if (bonus.GetBonusDurationTimer().getElapsedTime().asSeconds() > BONUS_ACTIVITY_DURATION)
+			{
+				ball_->setTexture(textureManager.get("ball"));
+				ball_->setSpeedMultiplier(BALL_SPEED);
+				continue;
+			}
+
+			ball_->setTexture(textureManager.get("fireball"));
+			ball_->setSpeedMultiplier(FIREBALL_SPEED);
+		}
+		else if (bonus.GetBonusType() == BonusType::BrittleBrick)
+		{
+		}
+		else if (bonus.GetBonusType() == BonusType::BoostPlatformSpeed)
+		{
+		}
 	}
-	checkBonusPlatformCollision();
+	// checkBonusWithPlatformCollision();
 }
 
 void GameState::clearBonus()
@@ -429,7 +456,7 @@ void GameState::clearBonus()
 void GameState::handleBrickCollisionResponse(const Block& brick)
 {
 	sf::FloatRect ballBounds = ball_->getGlobalBounds();
-	sf::FloatRect brickBounds = brick.getBounds();
+	sf::FloatRect brickBounds = brick.getGlobalBounds();
 
 	// Вычисляем степень перекрытия с каждой стороны
 	float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
@@ -450,17 +477,15 @@ void GameState::handleBrickCollisionResponse(const Block& brick)
 		ball_->reverseY();
 }
 
-void GameState::checkBonusPlatformCollision()
-{
-	bonuses_.erase(
-		std::remove_if(bonuses_.begin(), bonuses_.end(),
-			[&](const Bonus& bonus) {
-				return bonus.sprite_.getGlobalBounds().intersects(platform_->getGlobalBounds());
-			}),
-		bonuses_.end());
-}
+// void GameState::checkBonusWithPlatformCollision()
+// {
+// 	// bonuses_.erase(std::remove_if(bonuses_.begin(), bonuses_.end(), [&](const Bonus& bonus) {
+// 	// 	return bonus.getSprite().getGlobalBounds().intersects(platform_->getGlobalBounds());
+// 	// }),
+// 	// 	bonuses_.end());
+// }
 
-void GameState::checkGameConditions() 
+void GameState::checkGameConditions()
 {
 	checkLoseCondition();
 	checkWinCondition();
@@ -507,9 +532,9 @@ void GameState::render()
 	}
 
 	// Отрисовка бонусов
-	for (const Bonus& temp : bonuses_)
+	for (const Bonus& bonus : bonuses_)
 	{
-		window_->draw(temp.sprite_);
+		window_->draw(bonus.getSprite());
 	}
 
 	// Отрисовка платформы и мяча
@@ -598,7 +623,6 @@ void GameState::resetGame()
 	// Переинициализация мяча
 	ball_->reset(400, 500);
 	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
-	ball_->setColor(sf::Color::White);
 
 	// Сброс позиции платформы
 	platform_->setPosition(350, 550);

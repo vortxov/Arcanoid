@@ -2,6 +2,7 @@
 #include <assert.h>
 
 #include "Constants.h"
+#include "Platform.h"
 
 void Bonus::SetRandomBonusType(int randomBonusType)
 {
@@ -24,9 +25,14 @@ void Bonus::SetRandomBonusType(int randomBonusType)
 	}
 }
 
+bool Bonus::checkBonusWithPlatformCollision(const std::unique_ptr<Platform>& platform) const
+{
+	return getSprite().getGlobalBounds().intersects(platform->getGlobalBounds());
+}
+
 void Bonus::update(float deltaTime)
 {
-	sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + 100.f * deltaTime);
+	sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, (sprite_.getPosition().y) + BONUS_FALLING_SPEED * deltaTime);
 
 	sprite_.setPosition(newPosition);
 }
@@ -47,7 +53,7 @@ void Bonus::initBonus(const sf::Vector2f& brickPosition)
 	{
 		case BonusType::BrittleBrick:
 		{
-			assert(texture.loadFromFile("resources/textures/glassblocks_bonus.png"));
+			assert(texture.loadFromFile("resources/textures/glass_blocks_bonus.png"));
 			break;
 		}
 		case BonusType::FireBall:
@@ -65,6 +71,7 @@ void Bonus::initBonus(const sf::Vector2f& brickPosition)
 	}
 
 	sprite_.setScale(sf::Vector2f(SCALE_GAME, SCALE_GAME));
+	sprite_.setOrigin(0.5f * SCALE_GAME, 0.5f * SCALE_GAME);  // TODO: Сделать текстуру по центру, чтобы при разрушение кирпича, она спавнилась по центру
 	sprite_.setTexture(texture);
 	sprite_.setPosition(brickPosition);
 }

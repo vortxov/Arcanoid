@@ -5,3 +5,7 @@ constexpr int BONUS_DROP_CHANCE_PERCENT = 100;	// 10% шанс выпадени�
 constexpr int SPAWN_BRICK_STRONG_PERCENT = 10;	// 10% шанс появления на карте этого типа кирпича
 constexpr int SPAWN_BRICK_GLASS_PERCENT = 25;	// 25% шанс появления на карте этого типа кирпича
 constexpr float SCALE_GAME = 3.f;
+constexpr float BALL_SPEED = 1.f;
+constexpr float FIREBALL_SPEED = 1.2f;
+constexpr float BONUS_FALLING_SPEED = 100.f;
+constexpr float BONUS_ACTIVITY_DURATION = 10.f;	 // In seconds
