@@ -18,10 +18,21 @@ void Bonus::SetRandomBonusType(int randomBonusType)
 }
 
 
+void Bonus::update(float deltaTime)
+{
+    sf::Vector2f newPosition = sf::Vector2f(sprite_.getPosition().x, sprite_.getPosition().y + deltaTime * 100.f);
+
+    sprite_.setPosition(newPosition);
+}
 
 void Bonus::draw(sf::RenderWindow window)
 {
     window.draw(sprite_);
+}
+
+sf::FloatRect Bonus::getBounds() const
+{
+    return sprite_.getGlobalBounds();
 }
 
 void Bonus::initBonus(const sf::Vector2f& brickPosition)

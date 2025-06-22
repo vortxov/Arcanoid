@@ -15,7 +15,10 @@ public:
 	void SetRandomBonusType(int randomBonusType);
 	BonusType GetBonusType() { return bonusType;  };
 
+	void update(float deltaTime);
+
 	void draw(sf::RenderWindow window);
+	sf::FloatRect getBounds() const;
 
 	void initBonus(const sf::Vector2f& brickPosition);
 };
