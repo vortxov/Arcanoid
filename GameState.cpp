@@ -94,6 +94,7 @@ void GameState::setupScoreDisplay()
 	highscoreText_.setFillColor(sf::Color::Yellow);
 	highscoreText_.setPosition(20, 460);
 
+	scoreSystem_.readToHighscrores();
 	updateScoreDisplay(0);
 }
 
@@ -496,6 +497,7 @@ void GameState::checkLoseCondition()
 	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT)
 	{
 		gameLost_ = true;
+		scoreSystem_.saveToHighscores();
 	}
 }
 
@@ -508,6 +510,7 @@ void GameState::checkWinCondition()
 	if (allDestroyed)
 	{
 		gameWon_ = true;
+		scoreSystem_.saveToHighscores();
 	}
 }
 
@@ -549,7 +552,6 @@ void GameState::render()
 
 void GameState::showWinScreen()
 {
-	scoreSystem_.saveToHighscores();
 	window_->clear();
 	window_->draw(background_);
 	window_->draw(winText_);
@@ -581,7 +583,6 @@ void GameState::handleWinScreenInput()
 
 void GameState::showLoseScreen()
 {
-	scoreSystem_.saveToHighscores();
 	window_->clear();
 	window_->draw(background_);
 	window_->draw(loseText_);
@@ -628,4 +629,5 @@ void GameState::resetGame()
 
 	// Пересоздание кирпичей
 	initBricks();
+	updateScoreDisplay(scoreSystem_.getCurrentScore());
 }

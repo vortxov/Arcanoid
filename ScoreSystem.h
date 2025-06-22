@@ -3,6 +3,7 @@
 #include <functional>
 #include <unordered_map>
 
+
 class ScoreSystem {
 public:
     enum class BrickType { Normal, Strong, Glass };
@@ -11,6 +12,7 @@ public:
     void addScore(BrickType type);
     int getCurrentScore() const;
     void saveToHighscores();
+    void readToHighscrores();
     const std::vector<int>& getHighscores() const;
 
 private:
