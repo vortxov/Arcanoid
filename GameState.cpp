@@ -235,6 +235,7 @@ void GameState::handleInput()
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 	{
 		onMenu_ = true;
+		menuState_->setActive(true);
 	}
 }
 
