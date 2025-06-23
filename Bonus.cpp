@@ -70,8 +70,8 @@ void Bonus::initBonus(const sf::Vector2f& brickPosition)
 			break;
 	}
 
-	sprite_.setScale(sf::Vector2f(SCALE_GAME, SCALE_GAME));
-	sprite_.setOrigin(0.5f * SCALE_GAME, 0.5f * SCALE_GAME);  // TODO: Сделать текстуру по центру, чтобы при разрушение кирпича, она спавнилась по центру
+	sprite_.setScale(sf::Vector2f(0.5f, 0.5f));
+	sprite_.setOrigin(0.5f, 0.5f);	// TODO: Сделать текстуру по центру, чтобы при разрушение кирпича, она спавнилась по центру
+	sprite_.setPosition(brickPosition.x + 15.f, brickPosition.y);
 	sprite_.setTexture(texture);
-	sprite_.setPosition(brickPosition);
 }

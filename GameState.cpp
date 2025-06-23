@@ -314,14 +314,14 @@ void GameState::initBricks()
 	bricks_.clear();
 	bonuses_.clear();
 
-	static constexpr int rows = 5;
-	static constexpr int cols = 8;
-	static constexpr float brickWidth = 90.f;
-	static constexpr float brickHeight = 25.f;
-	static constexpr float spacing = 5.f;
-	static constexpr float startY = 50.f;
+	constexpr int rows = 5;
+	constexpr int cols = 8;
+	constexpr float brickWidth = 90.f;
+	constexpr float brickHeight = 30.f;
+	constexpr float spacing = 5.f;
+	constexpr float startY = 50.f;
 
-	const float totalWidth = cols * (brickWidth + spacing) - spacing;
+	const float totalWidth = cols * (brickWidth + spacing - 2.f);
 	const float startX = (SCREEN_WIDTH - totalWidth) / 2.f;
 
 	std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -428,8 +428,8 @@ void GameState::pushBonus(Block& brick)
 		return;	 // Нет бонуса — ничего не делать
 	}
 
-	// Начальная позиция бонуса — центр кирпича
-	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition().x, brick.getSprite().getPosition().y);
+	// Начальная позиция бонуса — центр кирпичаb
+	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition());
 
 	// Инициализация бонуса и добавление в список активных
 	brick.GetBonus().initBonus(brickPosition);
