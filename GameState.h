@@ -42,18 +42,14 @@ private:
 	void updateBonus(float deltaTime);	// Обновление положения и состояния бонусов
 	void clearBonus();					// Очистка всех активных бонусов
 
-	// === Коллизии ===
-	void checkCollisions();									// Общая проверка всех коллизий
-	void checkWallCollisions();								// Коллизия мяча со стенами
-	void checkPlatformCollision();							// Коллизия мяча с платформой
-	void checkBrickCollisions();							// Коллизия мяча с кирпичами
-	void handleBrickCollisionResponse(const Block& brick);	// Ответная реакция на столкновение с кирпичом
-	// void checkBonusWithPlatformCollision();					// Коллизия бонусов с платформой
-
 	// === Проверка условий завершения игры ===
 	void checkGameConditions();	 // Проверка: выигрыш или проигрыш
 	void checkLoseCondition();	 // Условие проигрыша
 	void checkWinCondition();	 // Условие победы
+
+	// === Проверка коллизий ===
+	void checkCollisions();
+	void checkBrickCollisions();
 
 	// === Экран победы/поражения ===
 	void showWinScreen();		   // Показать экран победы
@@ -91,4 +87,8 @@ private:
 	const float ballSpeedChangeInterval_ = 1.0f;  // Интервал между изменениями скорости
 	const float minBallSpeedMultiplier_ = 1.0f;	  // Минимальная скорость мяча
 	const float maxBallSpeedMultiplier_ = 1.5f;	  // Максимальная скорость мяча
+
+	// Test Fireball mechanic
+	sf::Clock bonusClockTimer_;
+	BonusType currentBonusActivity = BonusType::None;
 };

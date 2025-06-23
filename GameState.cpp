@@ -1,12 +1,8 @@
 #include "GameState.h"
 #include <iostream>
-#include <cmath>
-#include <stdexcept>
-#include <algorithm>
-#include <ctime>
-
 #include "GlassBrick.h"
 #include "NormalBrick.h"
+#include "Math.h"
 
 TextureManager GameState::textureManager;
 
@@ -56,6 +52,9 @@ void GameState::loadResources()
 	textureManager.load("brick_normal", "resources/textures/brick_normal.png");
 	textureManager.load("brick_strong", "resources/textures/brick_strong.png");
 	textureManager.load("brick_glass", "resources/textures/brick_glass.png");
+
+	// // Настроки для спрайтов
+	// ball_->getSprite().setScale(2.0f, 2.0f);
 
 	// Загрузка текстур
 	if (!font_.loadFromFile("resources/fonts/arial.ttf"))
@@ -314,65 +313,22 @@ void GameState::initBricks()
 
 void GameState::checkCollisions()
 {
-	checkWallCollisions();
-	checkPlatformCollision();
+	Math::checkWallCollisions(ball_);
+	Math::checkPlatformCollision(platform_, ball_);
 	checkBrickCollisions();
-}
-
-void GameState::checkWallCollisions()
-{
-	sf::Vector2f ballPos = ball_->getPosition();
-	float radius = ball_->getRadius();
-
-	// Отскок от левой и правой границ экрана
-	if (ballPos.x - radius <= 0 || ballPos.x + radius >= SCREEN_WIDTH)
-	{
-		ball_->reverseX();	// Изменить направление по оси X
-	}
-
-	// Отскок от верхней границы
-	if (ballPos.y - radius <= 0)
-	{
-		ball_->reverseY();	// Изменить направление по оси Y
-	}
-}
-
-void GameState::checkPlatformCollision()
-{
-	// Проверка на пересечение мяча и платформы
-	if (ball_->getGlobalBounds().intersects(platform_->getGlobalBounds()))
-	{
-		sf::Vector2f platformPos = platform_->getPosition();
-
-		// Центр платформы
-		float platformCenter = platformPos.x + platform_->getGlobalBounds().width / 2;
-
-		// Насколько далеко точка удара от центра платформы (-1 ... 1)
-		float hitPos = (ball_->getPosition().x - platformCenter) / (platform_->getGlobalBounds().width / 2);
-
-		// Задание нового направления вектора скорости мяча
-		sf::Vector2f newVel;
-		newVel.x = hitPos * 300.f;
-
-		// Поддержание постоянной длины скорости (300), вычисляя y через теорему Пифагора
-		newVel.y = -sqrt(300.f * 300.f - newVel.x * newVel.x);
-
-		ball_->setVelocity(newVel);
-	}
 }
 
 void GameState::checkBrickCollisions()
 {
 	for (auto& brick : bricks_)
 	{
-		// Если кирпич ещё не разрушен и есть столкновение с мячом
-		if (!brick->isDestroyed() && ball_->getGlobalBounds().intersects(brick->getGlobalBounds()))
+		if (Math::isBrickHitByBall(brick, ball_))
 		{
-			brick->hit();  // Уменьшить здоровье или уничтожить
+			brick->hit();  // Удар по кирпичу
 
-			// Начисление очков в зависимости от типа кирпича
 			if (brick->isDestroyed())
 			{
+				// Очки
 				if (dynamic_cast<NormalBrick*>(brick.get()))
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Normal);
@@ -386,16 +342,15 @@ void GameState::checkBrickCollisions()
 					scoreSystem_.addScore(ScoreSystem::BrickType::Glass);
 				}
 
-				pushBonus(*brick);	// Выпадение бонуса из кирпича
+				pushBonus(*brick);	// Бонус
 			}
 
-			// Обработка отскока от кирпича, если это нужно
 			if (brick->shouldBallBounce())
 			{
-				handleBrickCollisionResponse(*brick);
+				Math::handleBrickCollisionResponse(*brick, ball_);
 			}
 
-			break;	// Один отскок за кадр
+			break;	// Только одно столкновение за кадр
 		}
 	}
 }
@@ -417,35 +372,46 @@ void GameState::pushBonus(Block& brick)
 
 void GameState::updateBonus(float deltaTime)
 {
-	for (auto& bonus : bonuses_)
+	for (auto it = bonuses_.begin(); it != bonuses_.end();)
 	{
-		bonus.update(deltaTime);
-		if (bonus.checkBonusWithPlatformCollision(platform_))
+		it->update(deltaTime);
+
+		if (it->checkBonusWithPlatformCollision(platform_))
 		{
 			// Очищаем таймер, когда пересеклись с платформой
-			bonus.GetBonusDurationTimer().restart();
-		};
-
-		if (bonus.GetBonusType() == BonusType::FireBall)
-		{
-			if (bonus.GetBonusDurationTimer().getElapsedTime().asSeconds() > BONUS_ACTIVITY_DURATION)
-			{
-				ball_->setTexture(textureManager.get("ball"));
-				ball_->setSpeedMultiplier(BALL_SPEED);
-				continue;
-			}
-
-			ball_->setTexture(textureManager.get("fireball"));
-			ball_->setSpeedMultiplier(FIREBALL_SPEED);
+			bonusClockTimer_.restart();
+			currentBonusActivity = it->GetBonusType();
+			it = bonuses_.erase(it);
 		}
-		else if (bonus.GetBonusType() == BonusType::BrittleBrick)
+		else
 		{
-		}
-		else if (bonus.GetBonusType() == BonusType::BoostPlatformSpeed)
-		{
+			++it;
 		}
 	}
-	// checkBonusWithPlatformCollision();
+
+	// TODO: Создать метод, куда перенесём логику текущего активного бонуса
+	if (currentBonusActivity != BonusType::None && bonusClockTimer_.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
+	{
+		currentBonusActivity = BonusType::None;
+		ball_->setTexture(textureManager.get("ball"));
+		ball_->setSpeedMultiplier(BALL_SPEED);
+		bonusClockTimer_.restart();
+	}
+	else if (currentBonusActivity == BonusType::FireBall)
+	{
+		ball_->setTexture(textureManager.get("fireball"));
+		ball_->setSpeedMultiplier(FIREBALL_SPEED);
+	}
+	else if (currentBonusActivity == BonusType::BrittleBrick)
+	{
+		ball_->setTexture(textureManager.get("ball"));
+		ball_->setSpeedMultiplier(BALL_SPEED);
+	}
+	else if (currentBonusActivity == BonusType::BoostPlatformSpeed)
+	{
+		ball_->setTexture(textureManager.get("ball"));
+		ball_->setSpeedMultiplier(BALL_SPEED);
+	}
 }
 
 void GameState::clearBonus()
@@ -453,29 +419,29 @@ void GameState::clearBonus()
 	bonuses_.clear();
 }
 
-void GameState::handleBrickCollisionResponse(const Block& brick)
-{
-	sf::FloatRect ballBounds = ball_->getGlobalBounds();
-	sf::FloatRect brickBounds = brick.getGlobalBounds();
-
-	// Вычисляем степень перекрытия с каждой стороны
-	float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
-	float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
-	float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
-	float overlapBottom = brickBounds.top + brickBounds.height - ballBounds.top;
-
-	// Определение стороны удара
-	bool fromLeft = overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom;
-	bool fromRight = overlapRight < overlapLeft && overlapRight < overlapTop && overlapRight < overlapBottom;
-	bool fromTop = overlapTop < overlapLeft && overlapTop < overlapRight && overlapTop < overlapBottom;
-	bool fromBottom = overlapBottom < overlapLeft && overlapBottom < overlapRight && overlapBottom < overlapTop;
-
-	// Инвертируем соответствующую компоненту вектора скорости
-	if (fromLeft || fromRight)
-		ball_->reverseX();
-	if (fromTop || fromBottom)
-		ball_->reverseY();
-}
+// void GameState::handleBrickCollisionResponse(const Block& brick)
+// {
+// 	sf::FloatRect ballBounds = ball_->getGlobalBounds();
+// 	sf::FloatRect brickBounds = brick.getGlobalBounds();
+//
+// 	// Вычисляем степень перекрытия с каждой стороны
+// 	float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
+// 	float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
+// 	float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
+// 	float overlapBottom = brickBounds.top + brickBounds.height - ballBounds.top;
+//
+// 	// Определение стороны удара
+// 	bool fromLeft = overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom;
+// 	bool fromRight = overlapRight < overlapLeft && overlapRight < overlapTop && overlapRight < overlapBottom;
+// 	bool fromTop = overlapTop < overlapLeft && overlapTop < overlapRight && overlapTop < overlapBottom;
+// 	bool fromBottom = overlapBottom < overlapLeft && overlapBottom < overlapRight && overlapBottom < overlapTop;
+//
+// 	// Инвертируем соответствующую компоненту вектора скорости
+// 	if (fromLeft || fromRight)
+// 		ball_->reverseX();
+// 	if (fromTop || fromBottom)
+// 		ball_->reverseY();
+// }
 
 // void GameState::checkBonusWithPlatformCollision()
 // {
