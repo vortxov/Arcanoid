@@ -406,6 +406,11 @@ void GameState::updateBonus(float deltaTime)
 	{
 		ball_->setTexture(textureManager.get("ball"));
 		ball_->setSpeedMultiplier(BALL_SPEED);
+
+		for (auto& brick : bricks_)
+		{
+			brick->setTexture(textureManager.get("brick_glass"));
+		}
 	}
 	else if (currentBonusActivity == BonusType::BoostPlatformSpeed)
 	{
@@ -418,38 +423,6 @@ void GameState::clearBonus()
 {
 	bonuses_.clear();
 }
-
-// void GameState::handleBrickCollisionResponse(const Block& brick)
-// {
-// 	sf::FloatRect ballBounds = ball_->getGlobalBounds();
-// 	sf::FloatRect brickBounds = brick.getGlobalBounds();
-//
-// 	// Вычисляем степень перекрытия с каждой стороны
-// 	float overlapLeft = ballBounds.left + ballBounds.width - brickBounds.left;
-// 	float overlapRight = brickBounds.left + brickBounds.width - ballBounds.left;
-// 	float overlapTop = ballBounds.top + ballBounds.height - brickBounds.top;
-// 	float overlapBottom = brickBounds.top + brickBounds.height - ballBounds.top;
-//
-// 	// Определение стороны удара
-// 	bool fromLeft = overlapLeft < overlapRight && overlapLeft < overlapTop && overlapLeft < overlapBottom;
-// 	bool fromRight = overlapRight < overlapLeft && overlapRight < overlapTop && overlapRight < overlapBottom;
-// 	bool fromTop = overlapTop < overlapLeft && overlapTop < overlapRight && overlapTop < overlapBottom;
-// 	bool fromBottom = overlapBottom < overlapLeft && overlapBottom < overlapRight && overlapBottom < overlapTop;
-//
-// 	// Инвертируем соответствующую компоненту вектора скорости
-// 	if (fromLeft || fromRight)
-// 		ball_->reverseX();
-// 	if (fromTop || fromBottom)
-// 		ball_->reverseY();
-// }
-
-// void GameState::checkBonusWithPlatformCollision()
-// {
-// 	// bonuses_.erase(std::remove_if(bonuses_.begin(), bonuses_.end(), [&](const Bonus& bonus) {
-// 	// 	return bonus.getSprite().getGlobalBounds().intersects(platform_->getGlobalBounds());
-// 	// }),
-// 	// 	bonuses_.end());
-// }
 
 void GameState::checkGameConditions()
 {

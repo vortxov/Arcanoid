@@ -32,7 +32,6 @@ void Block::setPosition(float x, float y)
 void Block::setTexture(const sf::Texture& texture)
 {
 	sprite_.setTexture(texture);
-	sprite_.setColor(sf::Color::White);
 }
 
 void Block::draw(sf::RenderWindow& window) const
