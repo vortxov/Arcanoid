@@ -1,7 +1,8 @@
 #include "MenuState.h"
+#include "GameState.h"
 
 MenuState::MenuState(sf::RenderWindow& window, sf::Font& font)
-    : window_(window), font_(font), selectedIndex_(0), isActive_(false)
+    : window_(window), font_(font), selectedIndex_(0), isActive_(StateScreen::Menu)
 {
     // Настройка заголовка
     titleText_.setFont(font_);
@@ -16,7 +17,7 @@ MenuState::MenuState(sf::RenderWindow& window, sf::Font& font)
 
 void MenuState::handleInput(sf::Event& event)
 {
-    if (!isActive_ || menuItems_.empty()) return;
+    if (isActive_ != StateScreen::Menu || menuItems_.empty()) return;
     
     if (event.type == sf::Event::KeyPressed)
     {
@@ -40,14 +41,10 @@ void MenuState::handleInput(sf::Event& event)
     }
 }
 
-void MenuState::update(float deltaTime)
-{
-    // Здесь можно добавить анимации для меню
-}
 
 void MenuState::render()
 {
-    if (!isActive_) return;
+    if (isActive_ != StateScreen::Menu) return;
     
     window_.clear();
     

@@ -15,6 +15,7 @@ GameState::GameState(unsigned int width, unsigned int height)
 	, gameWon_(false)
 	, gameLost_(false)
 	, onMenu_(true)
+	, stateScreen(StateScreen::Menu)
 {
 	try
 	{
@@ -148,33 +149,20 @@ void GameState::run()
 	{
 		float deltaTime = clock.restart().asSeconds();
 
-		sf::Event event;
+		if (stateScreen == StateScreen::Menu)
+		{
+			sf::Event event;
         
-		while (window_->pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
+			while (window_->pollEvent(event))
 			{
-				window_->close();
-			}
+				if (event.type == sf::Event::Closed)
+				{
+					window_->close();
+				}
             
-			if (onMenu_)
-			{
 				menuState_->handleInput(event);
+					
 			}
-			else if (gameWon_)
-			{
-				handleWinScreenInput();
-			}
-			else if (gameLost_)
-			{
-				handleLoseScreenInput();
-			}
-		}
-
-
-		if (onMenu_)
-		{
-			menuState_->update(deltaTime);
 			menuState_->render();
 		}
 		else if (gameWon_)
@@ -234,8 +222,8 @@ void GameState::handleInput()
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 	{
-		onMenu_ = true;
-		menuState_->setActive(true);
+		stateScreen = StateScreen::Menu;
+		menuState_->setActive(stateScreen);
 	}
 }
 
@@ -246,19 +234,20 @@ void GameState::initMenu()
     
 	// Добавление пунктов меню
 	menuState_->addMenuItem("New Game", [this]() { startGame(); });
+	menuState_->addMenuItem("Continue", [this]() { continueGame(); });
 	menuState_->addMenuItem("Records", [this]() { 
 		// TODO: добавить таблицу рекордов
 	});
 	menuState_->addMenuItem("Exit", [this]() { exitGame(); });
     
-	menuState_->setActive(onMenu_);
+	menuState_->setActive(stateScreen);
 
 }
 
 void GameState::startGame()
 {
-	onMenu_ = false;
-	menuState_->setActive(false);
+	stateScreen = StateScreen::Game;
+	menuState_->setActive(stateScreen);
 	resetGame();
 }
 
@@ -267,7 +256,11 @@ void GameState::exitGame()
 	window_->close();
 }
 
-
+void GameState::continueGame()
+{
+	stateScreen = StateScreen::Game;
+	menuState_->setActive(stateScreen);
+}
 
 void GameState::clampPlatformPosition()
 {
@@ -603,14 +596,17 @@ void GameState::handleLoseScreenInput()
 		{
 			if (event.key.code == sf::Keyboard::Space)
 			{
-				resetGame();  // Перезапустить игру
+				resetGame();
 			}
 			else if (event.key.code == sf::Keyboard::Escape)
 			{
-				window_->close();  // Закрыть окно
+				stateScreen = StateScreen::Menu;
+				menuState_->setActive(stateScreen);
+				gameLost_ = false;
 			}
 		}
 	}
+
 }
 
 void GameState::resetGame()

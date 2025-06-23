@@ -3,6 +3,8 @@
 #include <vector>
 #include <functional>
 
+enum class StateScreen;
+
 class MenuState
 {
 public:
@@ -16,21 +18,20 @@ public:
 	MenuState(sf::RenderWindow& window, sf::Font& font);
     
 	void handleInput(sf::Event& event);
-	void update(float deltaTime);
 	void render();
     
 	void addMenuItem(const std::string& text, std::function<void()> action);
 	void setBackground(const sf::Texture& texture);
     
-	bool isActive() const { return isActive_; }
-	void setActive(bool active) { isActive_ = active; }
+	StateScreen GetActive() const { return isActive_; }
+	void setActive(StateScreen active) { isActive_ = active; }
 
 private:
 	sf::RenderWindow& window_;
 	sf::Font& font_;
 	std::vector<MenuItem> menuItems_;
 	int selectedIndex_;
-	bool isActive_;
+	StateScreen isActive_;
     
 	sf::Sprite background_;
 	sf::Text titleText_;

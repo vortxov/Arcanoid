@@ -11,6 +11,15 @@
 #include "MenuState.h"
 #include "Constants.h"
 
+enum class StateScreen
+{
+	Game,
+	Menu,
+	Records,
+	GameWon,
+	GameLost
+};
+
 class GameState
 {
 public:
@@ -83,11 +92,13 @@ private:
 	void showMenu();							  // Показать экран
 	void startGame();						      // Новая игра
 	void exitGame();							  // Выход
+	void continueGame();
 
 	// === Состояния игры ===
 	bool gameWon_;	 // Победа достигнута?
 	bool gameLost_;	 // Проигрыш наступил?
 	bool onMenu_;	 // Сейчас показывается меню?
+	StateScreen stateScreen;  // Состояние экрана
 
 	// === Параметры физики ===
 	const float platformSpeed_ = 5.0f;			  // Скорость движения платформы
