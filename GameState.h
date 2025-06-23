@@ -8,6 +8,7 @@
 #include "ScoreSystem.h"
 #include "TextureManager.h"
 #include "Bonus.h"
+#include "MenuState.h"
 #include "Constants.h"
 
 class GameState
@@ -74,6 +75,14 @@ private:
 	std::unique_ptr<Ball> ball_;				  // Игровой мяч
 	std::vector<std::unique_ptr<Block>> blocks_;  // Кирпичи (старое имя, не используется?)
 	std::vector<Bonus> bonuses_;				  // Активные бонусы на сцене
+	std::unique_ptr<MenuState> menuState_;	      // Экран меню
+
+	// === Меню ===
+	void initMenu();						      // Инициализация меню
+	void handleMenuInput(sf::Event& event);		  //
+	void showMenu();							  // Показать экран
+	void startGame();						      // Новая игра
+	void exitGame();							  // Выход
 
 	// === Состояния игры ===
 	bool gameWon_;	 // Победа достигнута?

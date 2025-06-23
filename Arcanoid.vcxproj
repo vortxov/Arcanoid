@@ -138,6 +138,7 @@
     <ClInclude Include="Constants.h" />
     <ClInclude Include="GlassBrick.h" />
     <ClInclude Include="Math.h" />
+    <ClInclude Include="MenuState.h" />
     <ClInclude Include="NormalBrick.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="GlassBrick.cpp" />
     <ClCompile Include="Math.cpp" />
+    <ClCompile Include="MenuState.cpp" />
     <ClCompile Include="NormalBrick.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Main.cpp" />
