@@ -1,7 +1,6 @@
 #include "GameState.h"
 #include <iostream>
-#include "GlassBrick.h"
-#include "NormalBrick.h"
+#include "Block.h"
 #include "Math.h"
 
 TextureManager GameState::textureManager;
@@ -285,18 +284,21 @@ void GameState::initBricks()
 		int typeChance = std::rand() % 100;
 		if (typeChance < SPAWN_BRICK_STRONG_PERCENT)  // 10% - Strong
 		{
-			brick = std::make_unique<StrongBrick>();
+			brick = std::make_unique<Block>(3, true);
 			brick->setTexture(textureManager.get("brick_strong"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Strong);
 		}
 		else if (typeChance < SPAWN_BRICK_GLASS_PERCENT)  // 25% - Glass
 		{
-			brick = std::make_unique<GlassBrick>();
+			brick = std::make_unique<Block>(1, false);
 			brick->setTexture(textureManager.get("brick_glass"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
 		}
 		else  // 65% - Normal
 		{
-			brick = std::make_unique<NormalBrick>();
+			brick = std::make_unique<Block>(1, true);
 			brick->setTexture(textureManager.get("brick_normal"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Normal);
 		}
 
 		// Шанс на бонус
@@ -329,15 +331,15 @@ void GameState::checkBrickCollisions()
 			if (brick->isDestroyed())
 			{
 				// Очки
-				if (dynamic_cast<NormalBrick*>(brick.get()))
+				if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Normal)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Normal);
 				}
-				else if (dynamic_cast<StrongBrick*>(brick.get()))
+				else if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Strong)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Strong);
 				}
-				else if (dynamic_cast<GlassBrick*>(brick.get()))
+				else if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Glass)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Glass);
 				}
@@ -345,7 +347,7 @@ void GameState::checkBrickCollisions()
 				pushBonus(*brick);	// Бонус
 			}
 
-			if (brick->shouldBallBounce())
+			if (brick->getShouldBallBounce())
 			{
 				Math::handleBrickCollisionResponse(*brick, ball_);
 			}

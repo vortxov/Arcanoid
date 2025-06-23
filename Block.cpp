@@ -1,9 +1,10 @@
 #include "Block.h"
 
-Block::Block()
-	: hitPoints_(1)
-	, destroyed_(false)
+Block::Block(int blowsToDestroy, bool shouldBallBounce)
 {
+	hitPoints_ = blowsToDestroy;
+	destroyed_ = false;
+	shouldBallBounce_ = shouldBallBounce;
 }
 
 void Block::SetRandomBonus(int random_bonus)

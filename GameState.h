@@ -4,7 +4,7 @@
 #include <vector>
 #include "Platform.h"
 #include "Ball.h"
-#include "StrongBrick.h"
+#include "Block.h"
 #include "ScoreSystem.h"
 #include "TextureManager.h"
 #include "Bonus.h"

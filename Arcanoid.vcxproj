@@ -136,28 +136,22 @@
     <ClInclude Include="Block.h" />
     <ClInclude Include="Bonus.h" />
     <ClInclude Include="Constants.h" />
-    <ClInclude Include="GlassBrick.h" />
     <ClInclude Include="Math.h" />
-    <ClInclude Include="NormalBrick.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Platform.h" />
     <ClInclude Include="ScoreSystem.h" />
-    <ClInclude Include="StrongBrick.h" />
     <ClInclude Include="TextureManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Bonus.cpp" />
-    <ClCompile Include="GlassBrick.cpp" />
     <ClCompile Include="Math.cpp" />
-    <ClCompile Include="NormalBrick.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Platform.cpp" />
     <ClCompile Include="ScoreSystem.cpp" />
-    <ClCompile Include="StrongBrick.cpp" />
     <ClCompile Include="TextureManager.cpp" />
   </ItemGroup>
   <ItemGroup>
