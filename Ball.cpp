@@ -57,7 +57,7 @@ void Ball::reverseY()
 	velocity_.y = -velocity_.y;
 }
 
-const sf::Sprite& Ball::getSprite() const
+sf::Sprite& Ball::getSprite()
 {
 	return sprite_;
 }

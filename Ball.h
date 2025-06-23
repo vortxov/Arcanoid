@@ -16,7 +16,7 @@ public:
 	void reverseX();
 	void reverseY();
 
-	const sf::Sprite& getSprite() const;
+	sf::Sprite& getSprite();
 	sf::FloatRect getGlobalBounds() const;
 	sf::Vector2f getPosition() const;
 	sf::Vector2f getVelocity() const;
