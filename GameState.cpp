@@ -184,6 +184,11 @@ void GameState::update(float deltaTime)
 	// AccelerationBallSpeed(deltaTime); // Not used
 	checkGameConditions();
 	updateBonus(deltaTime);
+	// TODO: Реализовать механику обновления блоков здесь
+	for (auto& brick : bricks_)
+	{
+		brick->updateState(textureManager);
+	}
 }
 
 void GameState::handleInput()
@@ -397,6 +402,13 @@ void GameState::updateBonus(float deltaTime)
 		currentBonusActivity = BonusType::None;
 		ball_->setTexture(textureManager.get("ball"));
 		ball_->setSpeedMultiplier(BALL_SPEED);
+
+		// Если время бонуса закончилось, то устанавливаем обычные кирпичи
+		for (auto& brick : bricks_)
+		{
+			brick->setCurrentBrickType(brick->getPastBrickType());
+		}
+
 		bonusClockTimer_.restart();
 	}
 	else if (currentBonusActivity == BonusType::FireBall)
@@ -411,7 +423,7 @@ void GameState::updateBonus(float deltaTime)
 
 		for (auto& brick : bricks_)
 		{
-			brick->setTexture(textureManager.get("brick_glass"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
 		}
 	}
 	else if (currentBonusActivity == BonusType::BoostPlatformSpeed)

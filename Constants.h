@@ -10,4 +10,4 @@ constexpr int SPAWN_BRICK_GLASS_PERCENT = 25;	// 1 = 1% шанс появлен�
 constexpr float BALL_SPEED = 1.f;
 constexpr float FIREBALL_SPEED = 1.5f;
 constexpr float BONUS_FALLING_SPEED = 100.f;
-constexpr float BONUS_ACTIVITY_DURATION = 7.f;	// In seconds
+constexpr float BONUS_ACTIVITY_DURATION = 3.f;	// In seconds
