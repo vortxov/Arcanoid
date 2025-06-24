@@ -32,13 +32,11 @@ void Block::setTexture(const sf::Texture& texture)
 
 void Block::setCurrentBrickType(EBT_BrickType brickType)
 {
-	if (currentBrickType_ == brickType)
+	if (currentBrickType_ != brickType)
 	{
-		return;
+		pastBrickType_ = currentBrickType_;
+		currentBrickType_ = brickType;
 	}
-
-	pastBrickType_ = currentBrickType_;
-	currentBrickType_ = brickType;
 }
 
 void Block::updateState(TextureManager& textureManager)

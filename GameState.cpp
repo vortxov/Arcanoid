@@ -406,7 +406,10 @@ void GameState::updateBonus(float deltaTime)
 		// Если время бонуса закончилось, то устанавливаем обычные кирпичи
 		for (auto& brick : bricks_)
 		{
-			brick->setCurrentBrickType(brick->getPastBrickType());
+			if (brick->getCurrentBrickType() == EBT_BrickType::EBT_Glass)
+			{
+				brick->setCurrentBrickType(brick->getPastBrickType());
+			}
 		}
 
 		bonusClockTimer_.restart();
