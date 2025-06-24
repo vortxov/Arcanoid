@@ -10,6 +10,8 @@
 #include "Bonus.h"
 #include "MenuState.h"
 #include "Constants.h"
+#include "SaveSystem.h"
+
 
 enum class StateScreen  // Состояние экрана
 {
@@ -68,6 +70,15 @@ private:
 	void handleLoseScreenInput();  // Обработка ввода на экране поражения
 	void resetGame();			   // Сбросить игру в начальное состояние
 
+	// === Система сохранения/загрузки ===
+	void saveGame();			   // Сохранить текущее состояние игры
+	void loadGame();			   // Загрузить состояние игры  
+	bool hasSavedGame() const;     // Проверить наличие сохранения
+	void createSaveData(GameSaveData& data); // Создать данные для сохранения
+	void applySaveData(const GameSaveData& saveData); // Применить загруженные данные
+
+
+
 	// === Ресурсы и отображение ===
 	static TextureManager textureManager;  // Менеджер текстур
 	ScoreSystem scoreSystem_;			   // Система подсчёта очков
@@ -77,6 +88,7 @@ private:
 	sf::Text winText_;					   // Текст победы
 	sf::Text loseText_;					   // Текст поражения
 	sf::Sprite background_;				   // Задний фон
+	SaveSystem saveSystem_;                // Система сохранений
 
 	// === Игровые объекты ===
 	std::unique_ptr<sf::RenderWindow> window_;	  // Основное окно SFML

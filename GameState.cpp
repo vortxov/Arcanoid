@@ -608,6 +608,186 @@ void GameState::handleLoseScreenInput()
 
 }
 
+
+
+void GameState::saveGame()
+{
+    GameSaveData saveData;
+    createSaveData(saveData);
+    
+    if (saveSystem_.saveGame(SaveSystem::getDefaultSaveFilename(), saveData))
+    {
+        std::cout << "Game saved successfully!" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Failed to save game!" << std::endl;
+    }
+}
+
+void GameState::loadGame()
+{
+    GameSaveData saveData;
+    
+    if (saveSystem_.loadGame(SaveSystem::getDefaultSaveFilename(), saveData))
+    {
+    	applySaveData(saveData);
+        stateScreen = StateScreen::Game;
+        menuState_->setActive(stateScreen);
+        std::cout << "Game loaded successfully!" << std::endl;
+    }
+    else
+    {
+        std::cerr << "Failed to load game!" << std::endl;
+    }
+}
+
+bool GameState::hasSavedGame() const
+{
+    return saveSystem_.saveExists(SaveSystem::getDefaultSaveFilename());
+}
+
+void GameState::createSaveData(GameSaveData& data)
+{
+    // Данные мяча
+    data.ballPosition = ball_->getPosition();
+    data.ballVelocity = ball_->getVelocity();
+    data.ballSpeedMultiplier = ball_->getSpeedMultiplier();
+    
+    // Данные платформы
+    data.platformPosition = platform_->getPosition();
+    
+    // Счёт
+    data.currentScore = scoreSystem_.getCurrentScore();
+    
+    // Активный бонус
+    data.activeBonusType = static_cast<int>(currentBonusActivity);
+    data.bonusTimeLeft = bonusClockTimer_.getElapsedTime().asSeconds();
+    
+    // Данные кирпичей
+    data.bricks.clear();
+    for (const auto& brick : bricks_)
+    {
+        GameSaveData::BrickData brickData;
+        brickData.position = brick->getSprite().getPosition();
+        brickData.isDestroyed = brick->isDestroyed();
+        
+        // Определяем тип кирпича
+        if (dynamic_cast<NormalBrick*>(brick.get()))
+        {
+            brickData.brickType = 0;
+            brickData.hitCount = 1;
+        }
+        else if (dynamic_cast<StrongBrick*>(brick.get()))
+        {
+            brickData.brickType = 1;
+        }
+        else if (dynamic_cast<GlassBrick*>(brick.get()))
+        {
+            brickData.brickType = 2;
+            brickData.hitCount = 1;
+        }
+        
+        brickData.bonusType = static_cast<int>(brick->GetBonus().GetBonusType());
+        data.bricks.push_back(brickData);
+    }
+    
+    // Активные бонусы на поле
+    data.activeBonuses.clear();
+    for (const auto& bonus : bonuses_)
+    {
+        GameSaveData::ActiveBonusData bonusData;
+        bonusData.position = bonus.getSprite().getPosition();
+        bonusData.velocity = bonus.getVelocity();
+        bonusData.bonusType = static_cast<int>(bonus.GetBonusType());
+        data.activeBonuses.push_back(bonusData);
+    }
+}
+
+void GameState::applySaveData(const GameSaveData& data)
+{
+    // Восстанавливаем мяч
+    ball_->setPosition(data.ballPosition.x, data.ballPosition.y);
+    ball_->setVelocity(data.ballVelocity);
+    ball_->setSpeedMultiplier(data.ballSpeedMultiplier);
+    
+    // Восстанавливаем платформу
+    platform_->setPosition(data.platformPosition.x, data.platformPosition.y);
+    
+    // Восстанавливаем счёт
+    scoreSystem_.setCurrentScore(data.currentScore);
+    updateScoreDisplay(data.currentScore);
+    
+    // Восстанавливаем активный бонус
+    currentBonusActivity = static_cast<BonusType>(data.activeBonusType);
+    if (currentBonusActivity != BonusType::None)
+    {
+        // Устанавливаем оставшееся время бонуса
+        sf::Time elapsed = sf::seconds(data.bonusTimeLeft);
+        bonusClockTimer_.restart();
+        // Здесь можно добавить логику для корректной установки времени
+    }
+    
+    // Восстанавливаем кирпичи
+    bricks_.clear();
+    for (const auto& brickData : data.bricks)
+    {
+        std::unique_ptr<Block> brick;
+        
+        // Создаём кирпич нужного типа
+        switch (brickData.brickType)
+        {
+        case 0: // Normal
+            brick = std::make_unique<NormalBrick>();
+            brick->setTexture(textureManager.get("brick_normal"));
+            break;
+        case 1: // Strong
+            brick = std::make_unique<StrongBrick>();
+            brick->setTexture(textureManager.get("brick_strong"));
+            // Устанавливаем количество ударов для сильного кирпича
+            if (auto strongBrick = dynamic_cast<StrongBrick*>(brick.get()))
+            {
+                for (int i = 1; i < brickData.hitCount; ++i)
+                {
+                    strongBrick->hit();
+                }
+            }
+            break;
+        case 2: // Glass 
+            brick = std::make_unique<GlassBrick>();
+            brick->setTexture(textureManager.get("brick_glass"));
+            break;
+        }
+        
+        brick->setPosition(brickData.position.x, brickData.position.y);
+        
+        if (brickData.isDestroyed)
+        {
+            brick->destroy();
+        }
+        
+        // Восстанавливаем бонус кирпича
+        if (brickData.bonusType != static_cast<int>(BonusType::None))
+        {
+            brick->SetRandomBonus(brickData.bonusType);
+        }
+        
+        bricks_.push_back(std::move(brick));
+    }
+    
+    // Восстанавливаем активные бонусы
+    bonuses_.clear();
+    for (const auto& bonusData : data.activeBonuses)
+    {
+        Bonus bonus;
+        bonus.initBonus(bonusData.position);
+        bonus.setVelocity(bonusData.velocity);
+        // Здесь нужно установить тип бонуса
+        bonuses_.push_back(bonus);
+    }
+}
+
+
 void GameState::resetGame()
 {
 	// Сброс флагов

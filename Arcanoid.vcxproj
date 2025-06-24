@@ -143,6 +143,7 @@
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="Platform.h" />
+    <ClInclude Include="SaveSystem.h" />
     <ClInclude Include="ScoreSystem.h" />
     <ClInclude Include="StrongBrick.h" />
     <ClInclude Include="TextureManager.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Platform.cpp" />
+    <ClCompile Include="SaveSystem.cpp" />
     <ClCompile Include="ScoreSystem.cpp" />
     <ClCompile Include="StrongBrick.cpp" />
     <ClCompile Include="TextureManager.cpp" />
