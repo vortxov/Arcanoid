@@ -11,7 +11,7 @@
 #include "MenuState.h"
 #include "Constants.h"
 
-enum class StateScreen
+enum class StateScreen  // Состояние экрана
 {
 	Game,
 	Menu,
@@ -88,16 +88,11 @@ private:
 
 	// === Меню ===
 	void initMenu();						      // Инициализация меню
-	void handleMenuInput(sf::Event& event);		  //
-	void showMenu();							  // Показать экран
 	void startGame();						      // Новая игра
 	void exitGame();							  // Выход
-	void continueGame();
+	void continueGame();						  // Продолжить игру
 
 	// === Состояния игры ===
-	bool gameWon_;	 // Победа достигнута?
-	bool gameLost_;	 // Проигрыш наступил?
-	bool onMenu_;	 // Сейчас показывается меню?
 	StateScreen stateScreen;  // Состояние экрана
 
 	// === Параметры физики ===

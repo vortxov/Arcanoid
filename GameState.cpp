@@ -12,9 +12,6 @@ GameState::GameState(unsigned int width, unsigned int height)
 	, ball_(std::make_unique<Ball>())
 	, currentBallSpeedMultiplier_(1.0f)
 	, ballSpeedChangeTimer_(0.0f)
-	, gameWon_(false)
-	, gameLost_(false)
-	, onMenu_(true)
 	, stateScreen(StateScreen::Menu)
 {
 	try
@@ -165,12 +162,12 @@ void GameState::run()
 			}
 			menuState_->render();
 		}
-		else if (gameWon_)
+		else if (stateScreen == StateScreen::GameWon)
 		{
 			handleWinScreenInput();
 			showWinScreen();
 		}
-		else if (gameLost_)
+		else if (stateScreen == StateScreen::GameLost)
 		{
 			handleLoseScreenInput();
 			showLoseScreen();
@@ -490,7 +487,7 @@ void GameState::checkLoseCondition()
 	// Если мяч улетел ниже экрана — поражение
 	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT)
 	{
-		gameLost_ = true;
+		stateScreen = StateScreen::GameLost;
 		scoreSystem_.saveToHighscores();
 	}
 }
@@ -503,7 +500,7 @@ void GameState::checkWinCondition()
 
 	if (allDestroyed)
 	{
-		gameWon_ = true;
+		stateScreen = StateScreen::GameWon;
 		scoreSystem_.saveToHighscores();
 	}
 }
@@ -536,9 +533,9 @@ void GameState::render()
 	window_->draw(ball_->getSprite());
 
 	// Отрисовка текста победы/поражения, если нужно
-	if (gameWon_)
+	if (stateScreen == StateScreen::GameWon)
 		window_->draw(winText_);
-	if (gameLost_)
+	if (stateScreen == StateScreen::GameLost)
 		window_->draw(loseText_);
 
 	window_->display();
@@ -565,11 +562,13 @@ void GameState::handleWinScreenInput()
 		{
 			if (event.key.code == sf::Keyboard::Space)
 			{
-				resetGame();  // Перезапустить игру
+				resetGame();
+				stateScreen = StateScreen::Game;
 			}
 			else if (event.key.code == sf::Keyboard::Escape)
 			{
-				window_->close();  // Выйти из игры
+				stateScreen = StateScreen::Menu;
+				menuState_->setActive(stateScreen);
 			}
 		}
 	}
@@ -597,12 +596,12 @@ void GameState::handleLoseScreenInput()
 			if (event.key.code == sf::Keyboard::Space)
 			{
 				resetGame();
+				stateScreen = StateScreen::Game;
 			}
 			else if (event.key.code == sf::Keyboard::Escape)
 			{
 				stateScreen = StateScreen::Menu;
 				menuState_->setActive(stateScreen);
-				gameLost_ = false;
 			}
 		}
 	}
@@ -612,8 +611,6 @@ void GameState::handleLoseScreenInput()
 void GameState::resetGame()
 {
 	// Сброс флагов
-	gameWon_ = false;
-	gameLost_ = false;
 	currentBallSpeedMultiplier_ = 1.0f;
 	ballSpeedChangeTimer_ = 0.0f;
 
