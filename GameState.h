@@ -37,10 +37,13 @@ private:
 	void clampPlatformPosition();				  // Ограничение движения платформы
 	void updateBall(float deltaTime);			  // Обновление позиции мяча
 	// void AccelerationBallSpeed(float deltaTime);  // Управление изменением скорости мяча // Not used
-	void initBricks();					// Создание и размещение кирпичей
-	void pushBonus(Block& brick);		// Добавление бонуса при разрушении кирпича
-	void updateBonus(float deltaTime);	// Обновление положения и состояния бонусов
-	void clearBonus();					// Очистка всех активных бонусов
+	void initBricks();							  // Создание и размещение кирпичей
+	void pushBonus(Block& brick);				  // Добавление бонуса при разрушении кирпича
+	void updateBonus(float deltaTime);			  // Обновление положения и состояния бонусов
+	void applyBonusEffect(BonusType bonusType);	  //
+	void cancelBonusEffect(BonusType bonusType);  //
+	void clearActiveBonuses();					  // Очистка бонусов, которые уже достигли платформы
+	void clearBonus();							  // Очистка всех активных бонусов
 
 	// === Проверка условий завершения игры ===
 	void checkGameConditions();	 // Проверка: выигрыш или проигрыш
@@ -88,7 +91,8 @@ private:
 	const float minBallSpeedMultiplier_ = 1.0f;	  // Минимальная скорость мяча
 	const float maxBallSpeedMultiplier_ = 1.5f;	  // Максимальная скорость мяча
 
-	// Test Fireball mechanic
-	sf::Clock bonusClockTimer_;
-	BonusType currentBonusActivity = BonusType::None;
+												  // Test Fireball mechanic
+	// sf::Clock bonusClockTimer_;
+	// BonusType currentBonusActivity = BonusType::None;
+	std::map<BonusType, sf::Clock> activeBonuses_;
 };

@@ -379,15 +379,17 @@ void GameState::pushBonus(Block& brick)
 
 void GameState::updateBonus(float deltaTime)
 {
+	// Обновляем падающие бонусы
 	for (auto it = bonuses_.begin(); it != bonuses_.end();)
 	{
 		it->update(deltaTime);
 
 		if (it->checkBonusWithPlatformCollision(platform_))
 		{
-			// Очищаем таймер, когда пересеклись с платформой
-			bonusClockTimer_.restart();
-			currentBonusActivity = it->GetBonusType();
+			// При сборе бонуса — сбрасываем/обновляем его таймер
+			BonusType type = it->GetBonusType();
+			activeBonuses_[type].restart();
+
 			it = bonuses_.erase(it);
 		}
 		else
@@ -396,44 +398,87 @@ void GameState::updateBonus(float deltaTime)
 		}
 	}
 
-	// TODO: Создать метод, куда перенесём логику текущего активного бонуса
-	if (currentBonusActivity != BonusType::None && bonusClockTimer_.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
+	// Обрабатываем активные бонусы
+	for (auto it = activeBonuses_.begin(); it != activeBonuses_.end();)
 	{
-		currentBonusActivity = BonusType::None;
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
-
-		// Если время бонуса закончилось, то устанавливаем обычные кирпичи
-		for (auto& brick : bricks_)
+		if (it->second.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
 		{
-			if (brick->getCurrentBrickType() == EBT_BrickType::EBT_Glass)
+			cancelBonusEffect(it->first);	// сбрасываем эффект бонуса
+			it = activeBonuses_.erase(it);	// удаляем из активных
+		}
+		else
+		{
+			applyBonusEffect(it->first);  // применяем эффект бонуса
+			++it;
+		}
+	}
+}
+
+void GameState::applyBonusEffect(BonusType bonusType)
+{
+	switch (bonusType)
+	{
+		case BonusType::FireBall:
+		{
+			ball_->setTexture(textureManager.get("fireball"));
+			ball_->setSpeedMultiplier(FIREBALL_SPEED);
+			break;
+		}
+		case BonusType::BrittleBrick:
+		{
+			for (auto& brick : bricks_)
+			{
+				if (brick->getCurrentBrickType() != EBT_BrickType::EBT_Glass)
+				{
+					brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
+				}
+			}
+			break;
+		}
+		case BonusType::BoostPlatformSpeed:
+		{
+			break;
+		}
+		case BonusType::None:
+			break;
+	}
+}
+
+void GameState::cancelBonusEffect(BonusType bonusType)
+{
+	switch (bonusType)
+	{
+		case BonusType::FireBall:
+		{
+			ball_->setTexture(textureManager.get("ball"));
+			ball_->setSpeedMultiplier(BALL_SPEED);
+			break;
+		}
+		case BonusType::BrittleBrick:
+		{
+			for (auto& brick : bricks_)
 			{
 				brick->setCurrentBrickType(brick->getPastBrickType());
 			}
+			break;
 		}
-
-		bonusClockTimer_.restart();
-	}
-	else if (currentBonusActivity == BonusType::FireBall)
-	{
-		ball_->setTexture(textureManager.get("fireball"));
-		ball_->setSpeedMultiplier(FIREBALL_SPEED);
-	}
-	else if (currentBonusActivity == BonusType::BrittleBrick)
-	{
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
-
-		for (auto& brick : bricks_)
+		case BonusType::BoostPlatformSpeed:
 		{
-			brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
+			break;
 		}
+		case BonusType::None:
+			break;
 	}
-	else if (currentBonusActivity == BonusType::BoostPlatformSpeed)
+}
+
+void GameState::clearActiveBonuses()
+{
+	for (const auto& it : activeBonuses_)
 	{
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
+		cancelBonusEffect(it.first);  // отключаем эффект каждого бонуса
 	}
+
+	activeBonuses_.clear();			  // очищаем все таймеры
 }
 
 void GameState::clearBonus()
@@ -582,6 +627,9 @@ void GameState::resetGame()
 
 	// Сброс позиции платформы
 	platform_->setPosition(350, 550);
+
+	// Очистка состояний активных бонусов
+	clearActiveBonuses();
 
 	// Пересоздание кирпичей
 	initBricks();

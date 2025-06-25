@@ -5,6 +5,8 @@ Block::Block(int blowsToDestroy, bool shouldBallBounce)
 	hitPoints_ = blowsToDestroy;
 	destroyed_ = false;
 	shouldBallBounce_ = shouldBallBounce;
+	currentBrickType_ = EBT_BrickType::EBT_None;
+	pastBrickType_ = currentBrickType_;
 }
 
 void Block::SetRandomBonus(int random_bonus)
@@ -30,12 +32,22 @@ void Block::setTexture(const sf::Texture& texture)
 	sprite_.setTexture(texture);
 }
 
-void Block::setCurrentBrickType(EBT_BrickType brickType)
+void Block::setCurrentBrickType(EBT_BrickType brickType, bool savePastBrickType)
 {
-	if (currentBrickType_ != brickType)
+	if (savePastBrickType)
 	{
 		pastBrickType_ = currentBrickType_;
-		currentBrickType_ = brickType;
+	}
+	currentBrickType_ = brickType;
+}
+
+void Block::applyBrittle()
+{
+	// Сохраняем только если ещё не был стеклянным
+	if (currentBrickType_ != EBT_BrickType::EBT_Glass)
+	{
+		pastBrickType_ = currentBrickType_;
+		currentBrickType_ = EBT_BrickType::EBT_Glass;
 	}
 }
 
