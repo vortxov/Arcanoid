@@ -7,7 +7,7 @@ TextureManager GameState::textureManager;
 
 GameState::GameState(unsigned int width, unsigned int height)
 	: window_(std::make_unique<sf::RenderWindow>(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Arkanoid", sf::Style::Titlebar | sf::Style::Close))
-	, platform_(std::make_unique<Platform>())
+	, platform_(std::make_unique<Platform>(PLATFORM_SIZE))
 	, ball_(std::make_unique<Ball>())
 	, currentBallSpeedMultiplier_(1.0f)
 	, ballSpeedChangeTimer_(0.0f)
@@ -179,7 +179,8 @@ void GameState::handleEvents()
 
 void GameState::update(float deltaTime)
 {
-	handleInput();
+	handleInput(deltaTime);
+	platform_->update(deltaTime);
 	updateBall(deltaTime);
 	// AccelerationBallSpeed(deltaTime); // Not used
 	checkGameConditions();
@@ -191,19 +192,19 @@ void GameState::update(float deltaTime)
 	}
 }
 
-void GameState::handleInput()
+void GameState::handleInput(float deltaTime)
 {
 	float direction = 0.f;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		direction -= 1.f;
+		direction -= 1.f * deltaTime;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		direction += 1.f;
+		direction += 1.f * deltaTime;
 	}
 
-	platform_->move(direction * platformSpeed_);
+	platform_->move(direction);
 	clampPlatformPosition();
 }
 
@@ -437,6 +438,8 @@ void GameState::applyBonusEffect(BonusType bonusType)
 		}
 		case BonusType::BoostPlatformSpeed:
 		{
+			platform_->setSpeed(PLATFORM_WITH_BONUS_SPEED);
+			platform_->setSize(PLATFORM_WITH_BONUS_SIZE);
 			break;
 		}
 		case BonusType::None:
@@ -464,6 +467,8 @@ void GameState::cancelBonusEffect(BonusType bonusType)
 		}
 		case BonusType::BoostPlatformSpeed:
 		{
+			platform_->setSpeed(PLATFORM_SPEED);
+			platform_->setSize(PLATFORM_SIZE);
 			break;
 		}
 		case BonusType::None:

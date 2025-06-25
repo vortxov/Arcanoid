@@ -33,7 +33,7 @@ private:
 	void handleEvents();						  // Обработка событий (ввод, закрытие)
 	void update(float deltaTime);				  // Обновление логики игры
 	void render();								  // Отрисовка кадра
-	void handleInput();							  // Обработка клавиш
+	void handleInput(float deltaTime);			  // Обработка клавиш
 	void clampPlatformPosition();				  // Ограничение движения платформы
 	void updateBall(float deltaTime);			  // Обновление позиции мяча
 	// void AccelerationBallSpeed(float deltaTime);  // Управление изменением скорости мяча // Not used
@@ -84,7 +84,6 @@ private:
 	bool onMenu_;	 // Сейчас показывается меню?
 
 	// === Параметры физики ===
-	const float platformSpeed_ = 5.0f;			  // Скорость движения платформы
 	float currentBallSpeedMultiplier_;			  // Текущий множитель скорости мяча
 	float ballSpeedChangeTimer_;				  // Таймер для изменения скорости мяча
 	const float ballSpeedChangeInterval_ = 1.0f;  // Интервал между изменениями скорости
