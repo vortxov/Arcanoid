@@ -63,7 +63,6 @@ bool SaveSystem::saveGame(const std::string& filename, const GameSaveData& data)
         for (const auto& bonus : data.activeBonuses)
         {
             writeVector2f(file, bonus.position);
-            writeVector2f(file, bonus.velocity);
             writeInt(file, bonus.bonusType);
         }
         
@@ -141,7 +140,6 @@ bool SaveSystem::loadGame(const std::string& filename, GameSaveData& data)
         {
             GameSaveData::ActiveBonusData bonus;
             bonus.position = readVector2f(file);
-            bonus.velocity = readVector2f(file);
             bonus.bonusType = readInt(file);
             data.activeBonuses.push_back(bonus);
         }

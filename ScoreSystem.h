@@ -13,6 +13,7 @@ public:
     int getCurrentScore() const;
     void saveToHighscores();
     void readToHighscrores();
+	void setCurrentScore(int score); 
     const std::vector<int>& getHighscores() const;
 
 private:

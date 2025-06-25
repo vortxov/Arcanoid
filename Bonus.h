@@ -24,7 +24,7 @@ public:
 	sf::Sprite getSprite() const { return sprite_; }
 	sf::Clock GetBonusDurationTimer() const { return bonusDurationTimer; }
 	sf::FloatRect getBounds() const;
-	BonusType GetBonusType() { return bonusType; };
+	BonusType GetBonusType() const { return bonusType; };
 
 private:
 	sf::Sprite sprite_;

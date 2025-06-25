@@ -221,6 +221,7 @@ void GameState::handleInput()
 	{
 		stateScreen = StateScreen::Menu;
 		menuState_->setActive(stateScreen);
+		saveGame();
 	}
 }
 
@@ -231,10 +232,13 @@ void GameState::initMenu()
     
 	// Добавление пунктов меню
 	menuState_->addMenuItem("New Game", [this]() { startGame(); });
-	menuState_->addMenuItem("Continue", [this]() { continueGame(); });
-	menuState_->addMenuItem("Records", [this]() { 
-		// TODO: добавить таблицу рекордов
-	});
+	//menuState_->addMenuItem("Continue", [this]() { loadGame(); });
+	//menuState_->addMenuItem("Save Game", [this]() { saveGame(); });
+	if (hasSavedGame())
+	{
+		menuState_->addMenuItem("Continue", [this]() { loadGame(); });
+		//menuState_->addMenuItem("Load Game", [this]() { loadGame(); });
+	}
 	menuState_->addMenuItem("Exit", [this]() { exitGame(); });
     
 	menuState_->setActive(stateScreen);
@@ -698,7 +702,6 @@ void GameState::createSaveData(GameSaveData& data)
     {
         GameSaveData::ActiveBonusData bonusData;
         bonusData.position = bonus.getSprite().getPosition();
-        bonusData.velocity = bonus.getVelocity();
         bonusData.bonusType = static_cast<int>(bonus.GetBonusType());
         data.activeBonuses.push_back(bonusData);
     }
@@ -780,9 +783,27 @@ void GameState::applySaveData(const GameSaveData& data)
     for (const auto& bonusData : data.activeBonuses)
     {
         Bonus bonus;
+    	switch (bonusData.bonusType)
+    	{
+    		case 0: // BrittleBrick
+    			bonus.SetRandomBonusType(0);
+    			break;
+    		case 1: // FireBall
+    			bonus.SetRandomBonusType(1);
+    			break;
+    		case 2: // BoostPlatformSpeed
+    			bonus.SetRandomBonusType(2);
+    			break;
+    		case 3: // None
+    			bonus.SetRandomBonusType(3);
+    			break;
+    		default: 
+    			bonus.SetRandomBonusType(3); // По умолчанию None
+    			break;
+
+    	}
+    	
         bonus.initBonus(bonusData.position);
-        bonus.setVelocity(bonusData.velocity);
-        // Здесь нужно установить тип бонуса
         bonuses_.push_back(bonus);
     }
 }

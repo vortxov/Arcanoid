@@ -44,7 +44,6 @@ struct GameSaveData
     struct ActiveBonusData
     {
         sf::Vector2f position;
-        sf::Vector2f velocity;
         int bonusType;
     };
     

@@ -23,6 +23,8 @@ public:
     virtual bool isDestroyed() const;
     virtual bool shouldBallBounce() const = 0;
 
+	void destroy() { destroyed_ = true; } // Принудительное разрушение кирпича
+
     void setPosition(float x, float y);
     void setTexture(const sf::Texture& texture);
 

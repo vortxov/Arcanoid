@@ -67,6 +67,12 @@ void ScoreSystem::readToHighscrores()
 	}
 }
 
+void ScoreSystem::setCurrentScore(int score)
+{
+	currentScore_ = score;
+	notifyObservers();
+}
+
 const std::vector<int>& ScoreSystem::getHighscores() const
 {
 	return highscores_;
