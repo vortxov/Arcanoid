@@ -4,7 +4,7 @@
 class Ball
 {
 public:
-	Ball(float radius = 10.f);
+	Ball(float radius);
 
 	void setPosition(float x, float y);
 	void setVelocity(const sf::Vector2f& velocity);
@@ -19,14 +19,15 @@ public:
 	sf::Sprite& getSprite();
 	sf::FloatRect getGlobalBounds() const;
 	sf::Vector2f getPosition() const;
-	sf::Vector2f getVelocity() const;
+	sf::Vector2f getRandomBallDirection();
+	// sf::Vector2f getVelocity() const;
 	float getRadius() const;
-	float getSpeedMultiplier() const;  // Not used
+	// float getSpeedMultiplier() const;  // Not used
 
 private:
+	float radius_;
+	float speedMultiplier_;
 	sf::Vector2f position_;
 	sf::Vector2f velocity_;
-	float speedMultiplier_;
 	sf::Sprite sprite_;
-	float radius_;
 };

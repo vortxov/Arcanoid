@@ -1,8 +1,3 @@
-#pragma once
-#include <SFML/Graphics.hpp>
-#include <memory>
-#include "Bonus.h"
-
 
 class Block {
 protected:

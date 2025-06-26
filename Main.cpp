@@ -2,7 +2,8 @@
 
 int main()
 {
-	GameState gameState(SCREEN_WIDTH, SCREEN_WIDTH);
+	GameState gameState;
 	gameState.run();
+
 	return 0;
 }

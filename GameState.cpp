@@ -1,18 +1,17 @@
 #include "GameState.h"
 #include <iostream>
-#include "GlassBrick.h"
-#include "NormalBrick.h"
 #include "Math.h"
+#include "Constants.h"
 
 TextureManager GameState::textureManager;
 
-GameState::GameState(unsigned int width, unsigned int height)
+GameState::GameState()
 	: window_(std::make_unique<sf::RenderWindow>(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Arkanoid", sf::Style::Titlebar | sf::Style::Close))
-	, platform_(std::make_unique<Platform>())
-	, ball_(std::make_unique<Ball>())
+	, platform_(std::make_unique<Platform>(PLATFORM_SIZE))
+	, ball_(std::make_unique<Ball>(BALL_RADIUS))
+	, stateScreen(StateScreen::Menu)
 	, currentBallSpeedMultiplier_(1.0f)
 	, ballSpeedChangeTimer_(0.0f)
-	, stateScreen(StateScreen::Menu)
 {
 	try
 	{
@@ -69,8 +68,8 @@ void GameState::initGameObjects()
 	background_.setColor(sf::Color::White);	 // Белый цвет без затемнения
 
 	// Установка текстуры заднего фона
-	ball_->setPosition(400, 500);
-	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
+	ball_->setPosition(BALL_START_POSITION.x, BALL_START_POSITION.y);
+	ball_->setVelocity(ball_->getRandomBallDirection());
 	ball_->setTexture(textureManager.get("ball"));
 
 	// Инициализация кирпичей
@@ -131,7 +130,7 @@ void GameState::setupText()
 	centerText(winText_);
 }
 
-void GameState::centerText(sf::Text& text)
+void GameState::centerText(sf::Text& text) const
 {
 	sf::FloatRect bounds = text.getLocalBounds();
 	text.setOrigin(bounds.left + bounds.width / 2.f, bounds.top + bounds.height / 2.f);
@@ -164,12 +163,12 @@ void GameState::run()
 		}
 		else if (stateScreen == StateScreen::GameWon)
 		{
-			handleWinScreenInput();
+			handleScreenInput();
 			showWinScreen();
 		}
 		else if (stateScreen == StateScreen::GameLost)
 		{
-			handleLoseScreenInput();
+			handleScreenInput();
 			showLoseScreen();
 		}
 		else
@@ -195,26 +194,32 @@ void GameState::handleEvents()
 
 void GameState::update(float deltaTime)
 {
-	handleInput();
+	handleInput(deltaTime);
+	platform_->update(deltaTime);
 	updateBall(deltaTime);
 	// AccelerationBallSpeed(deltaTime); // Not used
 	checkGameConditions();
 	updateBonus(deltaTime);
+	// TODO: Реализовать механику обновления блоков здесь
+	for (auto& brick : bricks_)
+	{
+		brick->updateState(textureManager);
+	}
 }
 
-void GameState::handleInput()
+void GameState::handleInput(float deltaTime)
 {
 	float direction = 0.f;
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		direction -= 1.f;
+		direction -= 1.f * deltaTime;
 	}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) || sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		direction += 1.f;
+		direction += 1.f * deltaTime;
 	}
 
-	platform_->move(direction * platformSpeed_);
+	platform_->move(direction);
 	clampPlatformPosition();
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
@@ -339,24 +344,27 @@ void GameState::initBricks()
 	int totalBricks = rows * cols;
 	for (int i = 0; i < totalBricks; ++i)
 	{
-		std::unique_ptr<Block> brick;
+		std::unique_ptr<Brick> brick;
 
 		// Рандомный тип кирпича
 		int typeChance = std::rand() % 100;
 		if (typeChance < SPAWN_BRICK_STRONG_PERCENT)  // 10% - Strong
 		{
-			brick = std::make_unique<StrongBrick>();
+			brick = std::make_unique<Brick>(3, true);
 			brick->setTexture(textureManager.get("brick_strong"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Strong);
 		}
 		else if (typeChance < SPAWN_BRICK_GLASS_PERCENT)  // 25% - Glass
 		{
-			brick = std::make_unique<GlassBrick>();
+			brick = std::make_unique<Brick>(1, false);
 			brick->setTexture(textureManager.get("brick_glass"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
 		}
 		else  // 65% - Normal
 		{
-			brick = std::make_unique<NormalBrick>();
+			brick = std::make_unique<Brick>(1, true);
 			brick->setTexture(textureManager.get("brick_normal"));
+			brick->setCurrentBrickType(EBT_BrickType::EBT_Normal);
 		}
 
 		// Шанс на бонус
@@ -389,23 +397,23 @@ void GameState::checkBrickCollisions()
 			if (brick->isDestroyed())
 			{
 				// Очки
-				if (dynamic_cast<NormalBrick*>(brick.get()))
+				if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Normal)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Normal);
 				}
-				else if (dynamic_cast<StrongBrick*>(brick.get()))
+				else if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Strong)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Strong);
 				}
-				else if (dynamic_cast<GlassBrick*>(brick.get()))
+				else if (brick.get()->getCurrentBrickType() == EBT_BrickType::EBT_Glass)
 				{
 					scoreSystem_.addScore(ScoreSystem::BrickType::Glass);
 				}
 
-				pushBonus(*brick);	// Бонус
+				pushBonus(*brick);	// Добавить бонус, если кирпич уничтожен
 			}
 
-			if (brick->shouldBallBounce())
+			if (brick->getShouldBallBounce())
 			{
 				Math::handleBrickCollisionResponse(*brick, ball_);
 			}
@@ -415,7 +423,7 @@ void GameState::checkBrickCollisions()
 	}
 }
 
-void GameState::pushBonus(Block& brick)
+void GameState::pushBonus(Brick& brick)
 {
 	if (brick.GetBonus().GetBonusType() == BonusType::None)
 	{
@@ -432,15 +440,17 @@ void GameState::pushBonus(Block& brick)
 
 void GameState::updateBonus(float deltaTime)
 {
+	// Обновляем падающие бонусы
 	for (auto it = bonuses_.begin(); it != bonuses_.end();)
 	{
 		it->update(deltaTime);
 
 		if (it->checkBonusWithPlatformCollision(platform_))
 		{
-			// Очищаем таймер, когда пересеклись с платформой
-			bonusClockTimer_.restart();
-			currentBonusActivity = it->GetBonusType();
+			// При сборе бонуса — сбрасываем/обновляем его таймер
+			BonusType type = it->GetBonusType();
+			activeBonuses_[type].restart();
+
 			it = bonuses_.erase(it);
 		}
 		else
@@ -449,29 +459,91 @@ void GameState::updateBonus(float deltaTime)
 		}
 	}
 
-	// TODO: Создать метод, куда перенесём логику текущего активного бонуса
-	if (currentBonusActivity != BonusType::None && bonusClockTimer_.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
+	// Обрабатываем активные бонусы
+	for (auto it = activeBonuses_.begin(); it != activeBonuses_.end();)
 	{
-		currentBonusActivity = BonusType::None;
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
-		bonusClockTimer_.restart();
+		if (it->second.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
+		{
+			cancelBonusEffect(it->first);	// сбрасываем эффект бонуса
+			it = activeBonuses_.erase(it);	// удаляем из активных
+		}
+		else
+		{
+			applyBonusEffect(it->first);  // применяем эффект бонуса
+			++it;
+		}
 	}
-	else if (currentBonusActivity == BonusType::FireBall)
+}
+
+void GameState::applyBonusEffect(BonusType bonusType)
+{
+	switch (bonusType)
 	{
-		ball_->setTexture(textureManager.get("fireball"));
-		ball_->setSpeedMultiplier(FIREBALL_SPEED);
+		case BonusType::FireBall:
+		{
+			ball_->setTexture(textureManager.get("fireball"));
+			ball_->setSpeedMultiplier(FIREBALL_MULTIPLIER_SPEED);
+			break;
+		}
+		case BonusType::BrittleBrick:
+		{
+			for (auto& brick : bricks_)
+			{
+				if (brick->getCurrentBrickType() != EBT_BrickType::EBT_Glass)
+				{
+					brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
+				}
+			}
+			break;
+		}
+		case BonusType::BoostPlatformSpeed:
+		{
+			platform_->setSpeed(PLATFORM_WITH_BONUS_SPEED);
+			platform_->setSize(PLATFORM_WITH_BONUS_SIZE);
+			break;
+		}
+		case BonusType::None:
+			break;
 	}
-	else if (currentBonusActivity == BonusType::BrittleBrick)
+}
+
+void GameState::cancelBonusEffect(BonusType bonusType)
+{
+	switch (bonusType)
 	{
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
+		case BonusType::FireBall:
+		{
+			ball_->setTexture(textureManager.get("ball"));
+			ball_->setSpeedMultiplier(BALL_SPEED);
+			break;
+		}
+		case BonusType::BrittleBrick:
+		{
+			for (auto& brick : bricks_)
+			{
+				brick->setCurrentBrickType(brick->getPastBrickType());
+			}
+			break;
+		}
+		case BonusType::BoostPlatformSpeed:
+		{
+			platform_->setSpeed(PLATFORM_SPEED);
+			platform_->setSize(PLATFORM_SIZE);
+			break;
+		}
+		case BonusType::None:
+			break;
 	}
-	else if (currentBonusActivity == BonusType::BoostPlatformSpeed)
+}
+
+void GameState::clearActiveBonuses()
+{
+	for (const auto& it : activeBonuses_)
 	{
-		ball_->setTexture(textureManager.get("ball"));
-		ball_->setSpeedMultiplier(BALL_SPEED);
+		cancelBonusEffect(it.first);  // отключаем эффект каждого бонуса
 	}
+
+	activeBonuses_.clear();			  // очищаем все таймеры
 }
 
 void GameState::clearBonus()
@@ -489,7 +561,7 @@ void GameState::checkGameConditions()
 void GameState::checkLoseCondition()
 {
 	// Если мяч улетел ниже экрана — поражение
-	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT)
+	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT + BOTTOM_DEAD_ZONE)
 	{
 		stateScreen = StateScreen::GameLost;
 		scoreSystem_.saveToHighscores();
@@ -553,31 +625,6 @@ void GameState::showWinScreen()
 	window_->display();
 }
 
-void GameState::handleWinScreenInput()
-{
-	sf::Event event;
-	while (window_->pollEvent(event))
-	{
-		if (event.type == sf::Event::Closed)
-		{
-			window_->close();
-		}
-		else if (event.type == sf::Event::KeyPressed)
-		{
-			if (event.key.code == sf::Keyboard::Space)
-			{
-				resetGame();
-				stateScreen = StateScreen::Game;
-			}
-			else if (event.key.code == sf::Keyboard::Escape)
-			{
-				stateScreen = StateScreen::Menu;
-				menuState_->setActive(stateScreen);
-			}
-		}
-	}
-}
-
 void GameState::showLoseScreen()
 {
 	window_->clear();
@@ -586,7 +633,7 @@ void GameState::showLoseScreen()
 	window_->display();
 }
 
-void GameState::handleLoseScreenInput()
+void GameState::handleScreenInput()
 {
 	sf::Event event;
 	while (window_->pollEvent(event))
@@ -818,11 +865,14 @@ void GameState::resetGame()
 	ballSpeedChangeTimer_ = 0.0f;
 
 	// Переинициализация мяча
-	ball_->reset(400, 500);
-	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
+	ball_->reset(BALL_START_POSITION.x, BALL_START_POSITION.y);
+	ball_->setVelocity(ball_->getRandomBallDirection());
 
 	// Сброс позиции платформы
 	platform_->setPosition(350, 550);
+
+	// Очистка состояний активных бонусов
+	clearActiveBonuses();
 
 	// Пересоздание кирпичей
 	initBricks();

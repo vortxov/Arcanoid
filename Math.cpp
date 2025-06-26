@@ -2,7 +2,7 @@
 #include "Constants.h"
 #include <SFML/Graphics/Rect.hpp>
 #include "Ball.h"
-#include "Block.h"
+#include "Brick.h"
 #include "Platform.h"
 
 void Math::checkWallCollisions(const std::unique_ptr<Ball>& ball)
@@ -10,16 +10,21 @@ void Math::checkWallCollisions(const std::unique_ptr<Ball>& ball)
 	sf::Vector2f ballPos = ball->getPosition();
 	float radius = ball->getRadius();
 
-	// Отскок от левой и правой границ экрана
-	if (ballPos.x - radius <= 0 || ballPos.x + radius >= SCREEN_WIDTH)
+	if (ballPos.x - radius <= 0)
 	{
-		ball->reverseX();  // Изменить направление по оси X
+		ball->reverseX();
+		ball->setPosition(radius, ballPos.y);
+	}
+	else if (ballPos.x + radius >= SCREEN_WIDTH)
+	{
+		ball->reverseX();
+		ball->setPosition(SCREEN_WIDTH - radius, ballPos.y);
 	}
 
-	// Отскок от верхней границы
 	if (ballPos.y - radius <= 0)
 	{
-		ball->reverseY();  // Изменить направление по оси Y
+		ball->reverseY();
+		ball->setPosition(ballPos.x, radius);
 	}
 }
 
@@ -39,7 +44,7 @@ void Math::checkPlatformCollision(const std::unique_ptr<Platform>& platform, con
 		// Ограничиваем hitPos, чтобы избежать ошибок
 		hitPos = Math::clamp(hitPos, -1.f, 1.f);
 
-		float speed = 300.f;
+		float speed = BALL_SPEED;
 		sf::Vector2f newVel;
 		newVel.x = hitPos * speed;
 
@@ -53,14 +58,14 @@ void Math::checkPlatformCollision(const std::unique_ptr<Platform>& platform, con
 	}
 }
 
-bool Math::isBrickHitByBall(const std::unique_ptr<Block>& brick, const std::unique_ptr<Ball>& ball)
+bool Math::isBrickHitByBall(const std::unique_ptr<Brick>& brick, const std::unique_ptr<Ball>& ball)
 {
 	// Проверка столкновения
 	// Если кирпич ещё не разрушен и есть столкновение с мячом
 	return !brick->isDestroyed() && ball->getGlobalBounds().intersects(brick->getGlobalBounds());
 }
 
-void Math::handleBrickCollisionResponse(const Block& brick, const std::unique_ptr<Ball>& ball)
+void Math::handleBrickCollisionResponse(const Brick& brick, const std::unique_ptr<Ball>& ball)
 {
 	sf::FloatRect ballBounds = ball->getGlobalBounds();
 	sf::FloatRect brickBounds = brick.getGlobalBounds();

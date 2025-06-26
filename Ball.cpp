@@ -1,12 +1,14 @@
 #include "Ball.h"
+#include "Constants.h"
+#include <random>
 
 Ball::Ball(float radius)
-	: position_(0, 0)
-	, velocity_(0, 0)
+	: radius_(radius)
 	, speedMultiplier_(1.0f)
-	, radius_(radius)
+	, position_(0, 0)
+	, velocity_(0, 0)
 {
-	sprite_.setOrigin(radius, radius);
+	sprite_.setOrigin(radius / 2.f, radius / 2.f);
 }
 
 void Ball::setPosition(float x, float y)
@@ -72,17 +74,34 @@ sf::Vector2f Ball::getPosition() const
 	return position_;
 }
 
-sf::Vector2f Ball::getVelocity() const
+sf::Vector2f Ball::getRandomBallDirection()
 {
-	return velocity_ * speedMultiplier_;
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dist(45.f, 180.f);
+
+	float vx = dist(gen);
+
+	// Случайный знак
+	if (std::uniform_int_distribution<int>(0, 1)(gen) == 0)
+	{
+		vx = -vx;
+	}
+
+	return sf::Vector2f(vx, -BALL_SPEED);
 }
+
+// sf::Vector2f Ball::getVelocity() const
+// {
+// 	return velocity_ * speedMultiplier_;
+// }
 
 float Ball::getRadius() const
 {
 	return radius_;
 }
 
-float Ball::getSpeedMultiplier() const
-{
-	return speedMultiplier_;
-}
+// float Ball::getSpeedMultiplier() const
+// {
+// 	return speedMultiplier_;
+// }
