@@ -47,23 +47,23 @@ sf::FloatRect Bonus::getBounds() const
 	return sprite_.getGlobalBounds();
 }
 
-void Bonus::initBonus(const sf::Vector2f& brickPosition)
+void Bonus::initBonus(const sf::Vector2f& brickPosition, TextureManager& textureManager)
 {
 	switch (bonusType)
 	{
 		case BonusType::BrittleBrick:
 		{
-			assert(texture.loadFromFile("resources/textures/glass_blocks_bonus.png"));
+			sprite_.setTexture(textureManager.get("glass_blocks_bonus"));
 			break;
 		}
 		case BonusType::FireBall:
 		{
-			assert(texture.loadFromFile("resources/textures/fireball_bonus.png"));
+			sprite_.setTexture(textureManager.get("fireball_bonus"));
 			break;
 		}
 		case BonusType::BoostPlatformSpeed:
 		{
-			assert(texture.loadFromFile("resources/textures/platform_bonus.png"));	// TODO: Другую текстурку
+			sprite_.setTexture(textureManager.get("platform_bonus"));
 			break;
 		}
 		default:
@@ -73,5 +73,5 @@ void Bonus::initBonus(const sf::Vector2f& brickPosition)
 	sprite_.setScale(sf::Vector2f(0.5f, 0.5f));
 	sprite_.setOrigin(0.5f, 0.5f);	// TODO: Сделать текстуру по центру, чтобы при разрушение кирпича, она спавнилась по центру
 	sprite_.setPosition(brickPosition.x + 15.f, brickPosition.y);
-	sprite_.setTexture(texture);
+	
 }

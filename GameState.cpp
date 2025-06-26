@@ -426,7 +426,7 @@ void GameState::pushBonus(Block& brick)
 	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition());
 
 	// Инициализация бонуса и добавление в список активных
-	brick.GetBonus().initBonus(brickPosition);
+	brick.GetBonus().initBonus(brickPosition, textureManager);
 	bonuses_.push_back(brick.GetBonus());
 }
 
@@ -697,13 +697,14 @@ void GameState::createSaveData(GameSaveData& data)
     }
     
     // Активные бонусы на поле
-    data.activeBonuses.clear();
+    //data.activeBonuses.clear();
     for (const auto& bonus : bonuses_)
     {
         GameSaveData::ActiveBonusData bonusData;
         bonusData.position = bonus.getSprite().getPosition();
         bonusData.bonusType = static_cast<int>(bonus.GetBonusType());
-        data.activeBonuses.push_back(bonusData);
+        //data.activeBonuses.push_back(bonusData);
+    	data.activeBonuses.emplace_back(bonusData);
     }
 }
 
@@ -803,8 +804,9 @@ void GameState::applySaveData(const GameSaveData& data)
 
     	}
     	
-        bonus.initBonus(bonusData.position);
-        bonuses_.push_back(bonus);
+        bonus.initBonus(bonusData.position, textureManager);
+        //bonuses_.push_back(bonus);
+    	bonuses_.emplace_back(bonus);
     }
 }
 

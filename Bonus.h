@@ -15,7 +15,7 @@ enum class BonusType
 class Bonus
 {
 public:
-	void initBonus(const sf::Vector2f& brickPosition);
+	void initBonus(const sf::Vector2f& brickPosition, TextureManager& textureManager);
 	void update(float deltaTime);
 	void SetRandomBonusType(int randomBonusType);
 	bool checkBonusWithPlatformCollision(const std::unique_ptr<Platform>& platform) const;
