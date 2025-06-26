@@ -19,6 +19,7 @@ public:
 	sf::Sprite& getSprite();
 	sf::FloatRect getGlobalBounds() const;
 	sf::Vector2f getPosition() const;
+	sf::Vector2f getRandomBallDirection();
 	// sf::Vector2f getVelocity() const;
 	float getRadius() const;
 	// float getSpeedMultiplier() const;  // Not used

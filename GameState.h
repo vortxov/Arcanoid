@@ -51,11 +51,11 @@ private:
 	void checkBrickCollisions();
 
 	// === Экран победы/поражения ===
-	void showWinScreen();		   // Показать экран победы
-	void handleWinScreenInput();   // Обработка ввода на экране победы
-	void showLoseScreen();		   // Показать экран поражения
-	void handleLoseScreenInput();  // Обработка ввода на экране поражения
-	void resetGame();			   // Сбросить игру в начальное состояние
+	void showWinScreen();	   // Показать экран победы
+	void handleScreenInput();  // Обработка ввода на экране победы
+	void showLoseScreen();	   // Показать экран поражения
+	// void handleLoseScreenInput();  // Обработка ввода на экране поражения
+	void resetGame();  // Сбросить игру в начальное состояние
 
 	// === Ресурсы и отображение ===
 	static TextureManager textureManager;  // Менеджер текстур

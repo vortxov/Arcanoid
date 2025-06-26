@@ -69,8 +69,8 @@ void GameState::initGameObjects()
 	background_.setColor(sf::Color::White);	 // Белый цвет без затемнения
 
 	// Установка текстуры заднего фона
-	ball_->setPosition(400, 500);
-	ball_->setVelocity(sf::Vector2f(0.f, -220.f));
+	ball_->setPosition(BALL_START_POSITION.x, BALL_START_POSITION.y);
+	ball_->setVelocity(ball_->getRandomBallDirection());
 	ball_->setTexture(textureManager.get("ball"));
 
 	// Инициализация кирпичей
@@ -148,12 +148,12 @@ void GameState::run()
 
 		if (gameWon_)
 		{
-			handleWinScreenInput();
+			handleScreenInput();
 			showWinScreen();
 		}
 		else if (gameLost_)
 		{
-			handleLoseScreenInput();
+			handleScreenInput();
 			showLoseScreen();
 		}
 		else
@@ -422,7 +422,7 @@ void GameState::applyBonusEffect(BonusType bonusType)
 		case BonusType::FireBall:
 		{
 			ball_->setTexture(textureManager.get("fireball"));
-			ball_->setSpeedMultiplier(FIREBALL_SPEED);
+			ball_->setSpeedMultiplier(FIREBALL_MULTIPLIER_SPEED);
 			break;
 		}
 		case BonusType::BrittleBrick:
@@ -500,7 +500,7 @@ void GameState::checkGameConditions()
 void GameState::checkLoseCondition()
 {
 	// Если мяч улетел ниже экрана — поражение
-	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT)
+	if (ball_->getPosition().y - ball_->getRadius() > SCREEN_HEIGHT + BOTTOM_DEAD_ZONE)
 	{
 		gameLost_ = true;
 		scoreSystem_.saveToHighscores();
@@ -564,7 +564,15 @@ void GameState::showWinScreen()
 	window_->display();
 }
 
-void GameState::handleWinScreenInput()
+void GameState::showLoseScreen()
+{
+	window_->clear();
+	window_->draw(background_);
+	window_->draw(loseText_);
+	window_->display();
+}
+
+void GameState::handleScreenInput()
 {
 	sf::Event event;
 	while (window_->pollEvent(event))
@@ -587,37 +595,6 @@ void GameState::handleWinScreenInput()
 	}
 }
 
-void GameState::showLoseScreen()
-{
-	window_->clear();
-	window_->draw(background_);
-	window_->draw(loseText_);
-	window_->display();
-}
-
-void GameState::handleLoseScreenInput()
-{
-	sf::Event event;
-	while (window_->pollEvent(event))
-	{
-		if (event.type == sf::Event::Closed)
-		{
-			window_->close();
-		}
-		else if (event.type == sf::Event::KeyPressed)
-		{
-			if (event.key.code == sf::Keyboard::Space)
-			{
-				resetGame();  // Перезапустить игру
-			}
-			else if (event.key.code == sf::Keyboard::Escape)
-			{
-				window_->close();  // Закрыть окно
-			}
-		}
-	}
-}
-
 void GameState::resetGame()
 {
 	// Сброс флагов
@@ -627,8 +604,8 @@ void GameState::resetGame()
 	ballSpeedChangeTimer_ = 0.0f;
 
 	// Переинициализация мяча
-	ball_->reset(400, 500);
-	ball_->setVelocity(sf::Vector2f(1.f, 0.f));
+	ball_->reset(BALL_START_POSITION.x, BALL_START_POSITION.y);
+	ball_->setVelocity(ball_->getRandomBallDirection());
 
 	// Сброс позиции платформы
 	platform_->setPosition(350, 550);
