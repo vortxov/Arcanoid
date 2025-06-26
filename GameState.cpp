@@ -1,19 +1,19 @@
 #include "GameState.h"
 #include <iostream>
-#include "Block.h"
 #include "Math.h"
+#include "Constants.h"
 
 TextureManager GameState::textureManager;
 
-GameState::GameState(unsigned int width, unsigned int height)
+GameState::GameState()
 	: window_(std::make_unique<sf::RenderWindow>(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Arkanoid", sf::Style::Titlebar | sf::Style::Close))
 	, platform_(std::make_unique<Platform>(PLATFORM_SIZE))
-	, ball_(std::make_unique<Ball>())
-	, currentBallSpeedMultiplier_(1.0f)
-	, ballSpeedChangeTimer_(0.0f)
+	, ball_(std::make_unique<Ball>(BALL_RADIUS))
 	, gameWon_(false)
 	, gameLost_(false)
 	, onMenu_(true)
+	, currentBallSpeedMultiplier_(1.0f)
+	, ballSpeedChangeTimer_(0.0f)
 {
 	try
 	{
@@ -70,7 +70,7 @@ void GameState::initGameObjects()
 
 	// Установка текстуры заднего фона
 	ball_->setPosition(400, 500);
-	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
+	ball_->setVelocity(sf::Vector2f(0.f, -220.f));
 	ball_->setTexture(textureManager.get("ball"));
 
 	// Инициализация кирпичей
@@ -131,7 +131,7 @@ void GameState::setupText()
 	centerText(winText_);
 }
 
-void GameState::centerText(sf::Text& text)
+void GameState::centerText(sf::Text& text) const
 {
 	sf::FloatRect bounds = text.getLocalBounds();
 	text.setOrigin(bounds.left + bounds.width / 2.f, bounds.top + bounds.height / 2.f);
@@ -284,25 +284,25 @@ void GameState::initBricks()
 	int totalBricks = rows * cols;
 	for (int i = 0; i < totalBricks; ++i)
 	{
-		std::unique_ptr<Block> brick;
+		std::unique_ptr<Brick> brick;
 
 		// Рандомный тип кирпича
 		int typeChance = std::rand() % 100;
 		if (typeChance < SPAWN_BRICK_STRONG_PERCENT)  // 10% - Strong
 		{
-			brick = std::make_unique<Block>(3, true);
+			brick = std::make_unique<Brick>(3, true);
 			brick->setTexture(textureManager.get("brick_strong"));
 			brick->setCurrentBrickType(EBT_BrickType::EBT_Strong);
 		}
 		else if (typeChance < SPAWN_BRICK_GLASS_PERCENT)  // 25% - Glass
 		{
-			brick = std::make_unique<Block>(1, false);
+			brick = std::make_unique<Brick>(1, false);
 			brick->setTexture(textureManager.get("brick_glass"));
 			brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
 		}
 		else  // 65% - Normal
 		{
-			brick = std::make_unique<Block>(1, true);
+			brick = std::make_unique<Brick>(1, true);
 			brick->setTexture(textureManager.get("brick_normal"));
 			brick->setCurrentBrickType(EBT_BrickType::EBT_Normal);
 		}
@@ -350,7 +350,7 @@ void GameState::checkBrickCollisions()
 					scoreSystem_.addScore(ScoreSystem::BrickType::Glass);
 				}
 
-				pushBonus(*brick);	// Бонус
+				pushBonus(*brick);	// Добавить бонус, если кирпич уничтожен
 			}
 
 			if (brick->getShouldBallBounce())
@@ -363,7 +363,7 @@ void GameState::checkBrickCollisions()
 	}
 }
 
-void GameState::pushBonus(Block& brick)
+void GameState::pushBonus(Brick& brick)
 {
 	if (brick.GetBonus().GetBonusType() == BonusType::None)
 	{
@@ -628,7 +628,7 @@ void GameState::resetGame()
 
 	// Переинициализация мяча
 	ball_->reset(400, 500);
-	ball_->setVelocity(sf::Vector2f(180.f, -220.f));
+	ball_->setVelocity(sf::Vector2f(1.f, 0.f));
 
 	// Сброс позиции платформы
 	platform_->setPosition(350, 550);

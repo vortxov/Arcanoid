@@ -1,6 +1,6 @@
-#include "Block.h"
+#include "Brick.h"
 
-Block::Block(int blowsToDestroy, bool shouldBallBounce)
+Brick::Brick(int blowsToDestroy, bool shouldBallBounce)
 {
 	hitPoints_ = blowsToDestroy;
 	destroyed_ = false;
@@ -9,12 +9,12 @@ Block::Block(int blowsToDestroy, bool shouldBallBounce)
 	pastBrickType_ = currentBrickType_;
 }
 
-void Block::SetRandomBonus(int random_bonus)
+void Brick::SetRandomBonus(int random_bonus)
 {
 	bonus.SetRandomBonusType(random_bonus);
 }
 
-void Block::hit()
+void Brick::hit()
 {
 	if (--hitPoints_ <= 0)
 	{
@@ -22,17 +22,17 @@ void Block::hit()
 	}
 }
 
-void Block::setPosition(float x, float y)
+void Brick::setPosition(float x, float y)
 {
 	sprite_.setPosition(x, y);
 }
 
-void Block::setTexture(const sf::Texture& texture)
+void Brick::setTexture(const sf::Texture& texture)
 {
 	sprite_.setTexture(texture);
 }
 
-void Block::setCurrentBrickType(EBT_BrickType brickType, bool savePastBrickType)
+void Brick::setCurrentBrickType(EBT_BrickType brickType, bool savePastBrickType)
 {
 	if (savePastBrickType)
 	{
@@ -41,7 +41,7 @@ void Block::setCurrentBrickType(EBT_BrickType brickType, bool savePastBrickType)
 	currentBrickType_ = brickType;
 }
 
-void Block::applyBrittle()
+void Brick::applyBrittle()
 {
 	// Сохраняем только если ещё не был стеклянным
 	if (currentBrickType_ != EBT_BrickType::EBT_Glass)
@@ -51,7 +51,7 @@ void Block::applyBrittle()
 	}
 }
 
-void Block::updateState(TextureManager& textureManager)
+void Brick::updateState(TextureManager& textureManager)
 {
 	switch (currentBrickType_)
 	{
@@ -80,7 +80,7 @@ void Block::updateState(TextureManager& textureManager)
 	}
 }
 
-void Block::draw(sf::RenderWindow& window) const
+void Brick::draw(sf::RenderWindow& window) const
 {
 	if (!destroyed_)
 	{

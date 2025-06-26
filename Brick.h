@@ -10,11 +10,11 @@ enum class EBT_BrickType
 	EBT_None
 };
 
-class Block
+class Brick
 {
 public:
-	Block(int blowsToDestroy, bool shouldBallBounce);
-	~Block() = default;
+	Brick(int blowsToDestroy, bool shouldBallBounce);
+	~Brick() = default;
 
 	void SetRandomBonus(int random_number);
 	Bonus& GetBonus() { return bonus; };

@@ -2,7 +2,7 @@
 #include "Constants.h"
 #include <SFML/Graphics/Rect.hpp>
 #include "Ball.h"
-#include "Block.h"
+#include "Brick.h"
 #include "Platform.h"
 
 void Math::checkWallCollisions(const std::unique_ptr<Ball>& ball)
@@ -53,14 +53,14 @@ void Math::checkPlatformCollision(const std::unique_ptr<Platform>& platform, con
 	}
 }
 
-bool Math::isBrickHitByBall(const std::unique_ptr<Block>& brick, const std::unique_ptr<Ball>& ball)
+bool Math::isBrickHitByBall(const std::unique_ptr<Brick>& brick, const std::unique_ptr<Ball>& ball)
 {
 	// Проверка столкновения
 	// Если кирпич ещё не разрушен и есть столкновение с мячом
 	return !brick->isDestroyed() && ball->getGlobalBounds().intersects(brick->getGlobalBounds());
 }
 
-void Math::handleBrickCollisionResponse(const Block& brick, const std::unique_ptr<Ball>& ball)
+void Math::handleBrickCollisionResponse(const Brick& brick, const std::unique_ptr<Ball>& ball)
 {
 	sf::FloatRect ballBounds = ball->getGlobalBounds();
 	sf::FloatRect brickBounds = brick.getGlobalBounds();

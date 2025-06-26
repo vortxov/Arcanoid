@@ -72,17 +72,17 @@ sf::Vector2f Ball::getPosition() const
 	return position_;
 }
 
-sf::Vector2f Ball::getVelocity() const
-{
-	return velocity_ * speedMultiplier_;
-}
+// sf::Vector2f Ball::getVelocity() const
+// {
+// 	return velocity_ * speedMultiplier_;
+// }
 
 float Ball::getRadius() const
 {
 	return radius_;
 }
 
-float Ball::getSpeedMultiplier() const
-{
-	return speedMultiplier_;
-}
+// float Ball::getSpeedMultiplier() const
+// {
+// 	return speedMultiplier_;
+// }

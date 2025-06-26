@@ -133,7 +133,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Ball.h" />
-    <ClInclude Include="Block.h" />
+    <ClInclude Include="Brick.h" />
     <ClInclude Include="Bonus.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Math.h" />
@@ -145,7 +145,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
-    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Brick.cpp" />
     <ClCompile Include="Bonus.cpp" />
     <ClCompile Include="Math.cpp" />
     <ClCompile Include="GameState.cpp" />
