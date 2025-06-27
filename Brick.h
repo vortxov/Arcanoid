@@ -13,7 +13,7 @@ enum class EBT_BrickType
 class Brick
 {
 public:
-	Brick(int blowsToDestroy, bool shouldBallBounce);
+	Brick(int blowsToDestroy = 1, bool shouldBallBounce = true);
 	~Brick() = default;
 
 	void SetRandomBonus(int random_number);

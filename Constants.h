@@ -6,7 +6,7 @@ constexpr int SCREEN_HEIGHT = 600;
 
 constexpr float BOTTOM_DEAD_ZONE = 30.f;
 
-constexpr int BONUS_DROP_CHANCE_PERCENT = 100;	// 1 = 1% шанс выпадения бонуса
+constexpr int BONUS_DROP_CHANCE_PERCENT = 100;	// 1 = 1% шанс выпадения бонуса // Release: value = 20;
 constexpr int SPAWN_BRICK_STRONG_PERCENT = 10;	// 1 = 1% шанс появления на карте этого типа кирпича
 constexpr int SPAWN_BRICK_GLASS_PERCENT = 25;	// 1 = 1% шанс появления на карте этого типа кирпича
 
