@@ -79,7 +79,7 @@ void Ball::adjustTrajectoryIfNeeded()
 
 		if (velocity_.y < 0)  // Мяч летит вверх - подталкиваем еще больше вверх
 		{
-			// Уменьшаем угол (делаем более вертикально вверх)z
+			// Уменьшаем угол (делаем более вертикально вверх)
 			newAngle = currentAngle - correctionAngle;
 		}
 		else  // Мяч летит вниз - подталкиваем еще больше вниз
@@ -97,9 +97,9 @@ void Ball::adjustTrajectoryIfNeeded()
 	}
 }
 
-sf::Vector2f Ball::getRandomBallDirection()
+sf::Vector2f Ball::getRandomBallDirection(bool canGoUp)
 {
-	return getRandomBallDirection(35.0f, 145.0f, true);	 // true = может лететь вверх
+	return getRandomBallDirection(35.0f, 145.0f, canGoUp);	// true = может лететь вверх
 }
 
 sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool canGoUp)
@@ -135,9 +135,4 @@ sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool c
 	}
 
 	return sf::Vector2f(vx, vy);
-}
-
-float Ball::getSpeedMultiplier() const
-{
-	return speedMultiplier_;
 }

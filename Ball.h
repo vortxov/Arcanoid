@@ -21,14 +21,14 @@ public:
 	void resetWallCollisionCount() { wallCollisionCount_ = 0; }
 	int getWallCollisionCount() const { return wallCollisionCount_; }
 	float getRadius() const { return radius_; }
+	float getSpeedMultiplier() const { return speedMultiplier_; }
 
 	sf::Sprite& getSprite() { return sprite_; }
 	sf::FloatRect getGlobalBounds() const { return sprite_.getGlobalBounds(); }
 	sf::Vector2f getPosition() const { return sprite_.getPosition(); }
 	sf::Vector2f getVelocity() const { return velocity_ * speedMultiplier_; }
-	sf::Vector2f getRandomBallDirection();
+	sf::Vector2f getRandomBallDirection(bool canGoUp = true);
 	sf::Vector2f getRandomBallDirection(float minAngle, float maxAngle, bool canGoUp = false);
-	float getSpeedMultiplier() const;  // Not used
 
 private:
 	float radius_;
