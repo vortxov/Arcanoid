@@ -39,22 +39,28 @@ bool SaveSystem::saveGame(const std::string& filename, const GameSaveData& data)
         // Счёт
         writeInt(file, data.currentScore);
         
-        // Активный бонус
-        writeInt(file, data.activeBonusType);
-        writeFloat(file, data.bonusTimeLeft);
+    	writeInt(file, static_cast<int>(data.activeBonusTimers.size()));
+    	for (const auto& timerData : data.activeBonusTimers)
+    	{
+    		writeInt(file, timerData.bonusType);
+    		writeFloat(file, timerData.timeElapsed);
+    	}
+
         
         // Количество кирпичей
         writeInt(file, static_cast<int>(data.bricks.size()));
         
         // Данные кирпичей
-        for (const auto& brick : data.bricks)
-        {
-            writeVector2f(file, brick.position);
-            writeInt(file, brick.brickType);
-            writeInt(file, brick.hitCount);
-            writeBool(file, brick.isDestroyed);
-            writeInt(file, brick.bonusType);
-        }
+    	for (const auto& brick : data.bricks)
+    	{
+    		writeVector2f(file, brick.position);
+    		writeInt(file, brick.brickType);
+    		writeInt(file, brick.pastBrickType); // Новая строка
+    		writeInt(file, brick.hitCount);
+    		writeBool(file, brick.isDestroyed);
+    		writeInt(file, brick.bonusType);
+    	}
+
         
         // Количество активных бонусов
         writeInt(file, static_cast<int>(data.activeBonuses.size()));
@@ -109,9 +115,20 @@ bool SaveSystem::loadGame(const std::string& filename, GameSaveData& data)
         // Счёт
         data.currentScore = readInt(file);
         
-        // Активный бонус
-        data.activeBonusType = readInt(file);
-        data.bonusTimeLeft = readFloat(file);
+    	// Активные бонусы с таймерами
+    	int bonusTimersCount = readInt(file);
+    	data.activeBonusTimers.clear();
+    	data.activeBonusTimers.reserve(bonusTimersCount);
+        
+    	for (int i = 0; i < bonusTimersCount; ++i)
+    	{
+    		GameSaveData::ActiveBonusTimerData timerData;
+    		timerData.bonusType = readInt(file);
+    		timerData.timeElapsed = readFloat(file);
+    		data.activeBonusTimers.push_back(timerData);
+    	}
+
+
         
         // Количество кирпичей
         int brickCount = readInt(file);
@@ -119,16 +136,18 @@ bool SaveSystem::loadGame(const std::string& filename, GameSaveData& data)
         data.bricks.reserve(brickCount);
         
         // Данные кирпичей
-        for (int i = 0; i < brickCount; ++i)
-        {
-            GameSaveData::BrickData brick;
-            brick.position = readVector2f(file);
-            brick.brickType = readInt(file);
-            brick.hitCount = readInt(file);
-            brick.isDestroyed = readBool(file);
-            brick.bonusType = readInt(file);
-            data.bricks.push_back(brick);
-        }
+    	for (int i = 0; i < brickCount; ++i)
+    	{
+    		GameSaveData::BrickData brick;
+    		brick.position = readVector2f(file);
+    		brick.brickType = readInt(file);
+    		brick.pastBrickType = readInt(file); // Новая строка
+    		brick.hitCount = readInt(file);
+    		brick.isDestroyed = readBool(file);
+    		brick.bonusType = readInt(file);
+    		data.bricks.push_back(brick);
+    	}
+
         
         // Количество активных бонусов
         int bonusCount = readInt(file);

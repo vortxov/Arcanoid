@@ -91,17 +91,17 @@ sf::Vector2f Ball::getRandomBallDirection()
 	return sf::Vector2f(vx, -BALL_SPEED);
 }
 
-// sf::Vector2f Ball::getVelocity() const
-// {
-// 	return velocity_ * speedMultiplier_;
-// }
+sf::Vector2f Ball::getVelocity() const
+{
+	return velocity_ * speedMultiplier_;
+}
 
 float Ball::getRadius() const
 {
 	return radius_;
 }
 
-// float Ball::getSpeedMultiplier() const
-// {
-// 	return speedMultiplier_;
-// }
+float Ball::getSpeedMultiplier() const
+{
+	return speedMultiplier_;
+}

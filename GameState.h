@@ -97,6 +97,8 @@ private:
 	std::vector<std::unique_ptr<Brick>> blocks_;  // Кирпичи (старое имя, не используется?)
 	std::vector<Bonus> bonuses_;				  // Активные бонусы на сцене
 	std::unique_ptr<MenuState> menuState_;	      // Экран меню
+	std::map<BonusType, float> bonusTimeOffsets_; // Смещение времени для восстановленных бонусов
+
 
 	// === Меню ===
 	void initMenu();						      // Инициализация меню

@@ -41,6 +41,12 @@ void Brick::setCurrentBrickType(EBT_BrickType brickType, bool savePastBrickType)
 	currentBrickType_ = brickType;
 }
 
+void Brick::setPastBrickType(EBT_BrickType brickType)
+{
+	pastBrickType_ = brickType;
+}
+
+
 void Brick::applyBrittle()
 {
 	// Сохраняем только если ещё не был стеклянным

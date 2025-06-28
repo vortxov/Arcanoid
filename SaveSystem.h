@@ -24,21 +24,28 @@ struct GameSaveData
     // Счёт
     int currentScore;
     
-    // Активный бонус
-    int activeBonusType; // Приведение BonusType к int
-    float bonusTimeLeft;
-    
     // Данные кирпичей (упрощённая структура)
-    struct BrickData
-    {
-        sf::Vector2f position;
-        int brickType; // 0-Normal, 1-Strong, 2-Glass
-        int hitCount; // Для StrongBrick
-        bool isDestroyed;
-        int bonusType; // Какой бонус содержит
-    };
+	struct BrickData
+	{
+		sf::Vector2f position;
+		int brickType; // 0-Normal, 1-Strong, 2-Glass
+		int pastBrickType; // Предыдущий тип кирпича (для восстановления после бонуса)
+		int hitCount; // Для StrongBrick
+		bool isDestroyed;
+		int bonusType; // Какой бонус содержит
+	};
+
     
     std::vector<BrickData> bricks;
+
+	// Активные бонусы (новая структура для множественных бонусов)
+	struct ActiveBonusTimerData
+	{
+		int bonusType; // Тип бонуса (BonusType -> int)
+		float timeElapsed; // Сколько времени уже прошло с активации
+	};
+	std::vector<ActiveBonusTimerData> activeBonusTimers;
+
     
     // Активные бонусы на поле
     struct ActiveBonusData

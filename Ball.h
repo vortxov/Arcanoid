@@ -20,9 +20,9 @@ public:
 	sf::FloatRect getGlobalBounds() const;
 	sf::Vector2f getPosition() const;
 	sf::Vector2f getRandomBallDirection();
-	// sf::Vector2f getVelocity() const;
+	sf::Vector2f getVelocity() const;
 	float getRadius() const;
-	// float getSpeedMultiplier() const;  // Not used
+	float getSpeedMultiplier() const;  // Not used
 
 private:
 	float radius_;
