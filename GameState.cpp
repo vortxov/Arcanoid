@@ -458,19 +458,6 @@ void GameState::updateBonus(float deltaTime)
 	}
 
 	// Обрабатываем активные бонусы
-	// for (auto it = activeBonuses_.begin(); it != activeBonuses_.end();)
-	// {
-	// 	if (it->second.getElapsedTime().asSeconds() >= BONUS_ACTIVITY_DURATION)
-	// 	{
-	// 		cancelBonusEffect(it->first);	// сбрасываем эффект бонуса
-	// 		it = activeBonuses_.erase(it);	// удаляем из активных
-	// 	}
-	// 	else
-	// 	{
-	// 		applyBonusEffect(it->first);  // применяем эффект бонуса
-	// 		++it;
-	// 	}
-	// }
 	for (auto it = activeBonuses_.begin(); it != activeBonuses_.end();)
 	{
 		float totalElapsed = it->second.getElapsedTime().asSeconds();
@@ -483,13 +470,13 @@ void GameState::updateBonus(float deltaTime)
     
 		if (totalElapsed >= BONUS_ACTIVITY_DURATION)
 		{
-			cancelBonusEffect(it->first);
+			cancelBonusEffect(it->first); // сбрасываем эффект бонуса
 			bonusTimeOffsets_.erase(it->first); // Удаляем смещение
-			it = activeBonuses_.erase(it);
+			it = activeBonuses_.erase(it); // удаляем из активных
 		}
 		else
 		{
-			applyBonusEffect(it->first);
+			applyBonusEffect(it->first); // применяем эффект бонуса
 			++it;
 		}
 	}
@@ -828,10 +815,6 @@ void GameState::applySaveData(const GameSaveData& data)
 		sf::Clock bonusClock;
 		activeBonuses_[bonusType] = std::move(bonusClock);
         
-		// Примечание: SFML не позволяет напрямую установить время Clock
-		// Поэтому мы запустим Clock и будем учитывать уже прошедшее время
-		// в логике updateBonus, вычитая timerData.timeElapsed
-
 		
 		// Применяем эффект бонуса
 		applyBonusEffect(bonusType);
