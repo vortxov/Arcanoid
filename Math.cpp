@@ -9,22 +9,35 @@ void Math::checkWallCollisions(const std::unique_ptr<Ball>& ball)
 {
 	sf::Vector2f ballPos = ball->getPosition();
 	float radius = ball->getRadius();
+	bool wallHit = false;
 
+	// Левая стена
 	if (ballPos.x - radius <= 0)
 	{
 		ball->reverseX();
 		ball->setPosition(radius, ballPos.y);
+		wallHit = true;
 	}
+	// Правая стена
 	else if (ballPos.x + radius >= SCREEN_WIDTH)
 	{
 		ball->reverseX();
 		ball->setPosition(SCREEN_WIDTH - radius, ballPos.y);
+		wallHit = true;
 	}
 
+	// Верхняя стена
 	if (ballPos.y - radius <= 0)
 	{
 		ball->reverseY();
 		ball->setPosition(ballPos.x, radius);
+	}
+
+	// Если было столкновение с боковой стеной, увеличиваем счетчик
+	if (wallHit)
+	{
+		ball->incrementWallCollisionCount();
+		ball->adjustTrajectoryIfNeeded();
 	}
 }
 
@@ -42,7 +55,7 @@ void Math::checkPlatformCollision(const std::unique_ptr<Platform>& platform, con
 		float hitPos = (ball->getPosition().x - platformCenter) / (platform->getGlobalBounds().width / 2);
 
 		// Ограничиваем hitPos, чтобы избежать ошибок
-		hitPos = Math::clamp(hitPos, -1.f, 1.f);
+		hitPos = clamp(hitPos, -1.f, 1.f);
 
 		float speed = BALL_SPEED;
 		sf::Vector2f newVel;
@@ -55,6 +68,9 @@ void Math::checkPlatformCollision(const std::unique_ptr<Platform>& platform, con
 		newVel.y = (ySquared > 0.f) ? -std::sqrt(ySquared) : -1.f;
 
 		ball->setVelocity(newVel);
+
+		// Сбрасываем счетчик столкновений со стенами при ударе о платформу
+		ball->resetWallCollisionCount();
 	}
 }
 
@@ -87,4 +103,7 @@ void Math::handleBrickCollisionResponse(const Brick& brick, const std::unique_pt
 		ball->reverseX();
 	if (fromTop || fromBottom)
 		ball->reverseY();
+
+	// Сбрасываем счетчик столкновений со стенами при ударе о кирпич
+	ball->resetWallCollisionCount();
 }
