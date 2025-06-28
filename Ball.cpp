@@ -129,15 +129,16 @@ sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool c
 	// Направление по вертикали
 	if (!canGoUp)
 	{
-		vy = -std::abs(vy);	 // Всегда вниз (отрицательное значение)
+		vy = std::abs(vy);	 // Всегда вниз (отрицательное значение)
 	}
 	else
 	{
 		// Случайное направление вверх/вниз
-		if (std::uniform_int_distribution<int>(0, 1)(gen) == 0)
-		{
-			vy = -vy;
-		}
+		// if (std::uniform_int_distribution<int>(0, 1)(gen) == 0)
+		// {
+		// 	vy = -vy;
+		// }
+		vy = -std::abs(vy);
 	}
 
 	return sf::Vector2f(vx, vy);
