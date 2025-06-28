@@ -409,7 +409,7 @@ void GameState::pushBonus(Brick& brick)
 		return;	 // Нет бонуса — ничего не делать
 	}
 
-	// Начальная позиция бонуса — центр кирпичаb
+	// Начальная позиция бонуса — центр кирпича
 	sf::Vector2f brickPosition = sf::Vector2f(brick.getSprite().getPosition());
 
 	// Инициализация бонуса и добавление в список активных
@@ -442,26 +442,25 @@ void GameState::updateBonus(float deltaTime)
 	for (auto it = activeBonuses_.begin(); it != activeBonuses_.end();)
 	{
 		float totalElapsed = it->second.getElapsedTime().asSeconds();
-    
+
 		// Учитываем смещение времени для восстановленных бонусов
 		if (bonusTimeOffsets_.count(it->first) > 0)
 		{
 			totalElapsed += bonusTimeOffsets_[it->first];
 		}
-    
+
 		if (totalElapsed >= BONUS_ACTIVITY_DURATION)
 		{
-			cancelBonusEffect(it->first); // сбрасываем эффект бонуса
-			bonusTimeOffsets_.erase(it->first); // Удаляем смещение
-			it = activeBonuses_.erase(it); // удаляем из активных
+			cancelBonusEffect(it->first);		 // сбрасываем эффект бонуса
+			bonusTimeOffsets_.erase(it->first);	 // Удаляем смещение
+			it = activeBonuses_.erase(it);		 // удаляем из активных
 		}
 		else
 		{
-			applyBonusEffect(it->first); // применяем эффект бонуса
+			applyBonusEffect(it->first);  // применяем эффект бонуса
 			++it;
 		}
 	}
-
 }
 
 void GameState::applyBonusEffect(BonusType bonusType)
@@ -503,7 +502,7 @@ void GameState::cancelBonusEffect(BonusType bonusType)
 		case BonusType::FireBall:
 		{
 			ball_->setTexture(textureManager.get("ball"));
-			ball_->setSpeedMultiplier(BALL_SPEED);
+			ball_->setSpeedMultiplier(1.0f);
 			break;
 		}
 		case BonusType::BrittleBrick:
@@ -707,16 +706,16 @@ void GameState::createSaveData(GameSaveData& data)
 		timerData.timeElapsed = activeBonus.second.getElapsedTime().asSeconds();
 		data.activeBonusTimers.push_back(timerData);
 	}
-	
+
 	// Данные кирпичей
 	data.bricks.clear();
 	for (const auto& brick : bricks_)
 	{
-	    GameSaveData::BrickData brickData;
-	    brickData.position = brick->getSprite().getPosition();
-	    brickData.isDestroyed = brick->isDestroyed();
-	
-	    // Определяем тип кирпича
+		GameSaveData::BrickData brickData;
+		brickData.position = brick->getSprite().getPosition();
+		brickData.isDestroyed = brick->isDestroyed();
+
+		// Определяем тип кирпича
 		if (brick->getCurrentBrickType() == EBT_BrickType::EBT_Normal)
 		{
 			brickData.brickType = 0;
@@ -734,7 +733,7 @@ void GameState::createSaveData(GameSaveData& data)
 		}
 		else
 		{
-			brickData.brickType = 0; // По умолчанию Normal
+			brickData.brickType = 0;  // По умолчанию Normal
 			brickData.hitCount = 1;
 		}
 		// Определяем предыдущий тип кирпича
@@ -752,23 +751,22 @@ void GameState::createSaveData(GameSaveData& data)
 		}
 		else
 		{
-			brickData.pastBrickType = 0; // По умолчанию Normal
+			brickData.pastBrickType = 0;  // По умолчанию Normal
 		}
 
 		brickData.hitCount = brick->getHitPoints();
 		brickData.bonusType = static_cast<int>(brick->GetBonus().GetBonusType());
 		data.bricks.push_back(brickData);
-
 	}
-	
+
 	// Активные бонусы на поле
-	//data.activeBonuses.clear();
+	data.activeBonuses.clear();
 	for (const auto& bonus : bonuses_)
 	{
-	    GameSaveData::ActiveBonusData bonusData;
-	    bonusData.position = bonus.getSprite().getPosition();
-	    bonusData.bonusType = static_cast<int>(bonus.GetBonusType());
-	    //data.activeBonuses.push_back(bonusData);
+		GameSaveData::ActiveBonusData bonusData;
+		bonusData.position = bonus.getSprite().getPosition();
+		bonusData.bonusType = static_cast<int>(bonus.GetBonusType());
+		// data.activeBonuses.push_back(bonusData);
 		data.activeBonuses.emplace_back(bonusData);
 	}
 }
@@ -779,32 +777,29 @@ void GameState::applySaveData(const GameSaveData& data)
 	ball_->setPosition(data.ballPosition.x, data.ballPosition.y);
 	ball_->setVelocity(data.ballVelocity);
 	ball_->setSpeedMultiplier(data.ballSpeedMultiplier);
-	
+
 	// Восстанавливаем платформу
 	platform_->setPosition(data.platformPosition.x, data.platformPosition.y);
-	
+
 	// Восстанавливаем счёт
 	scoreSystem_.setCurrentScore(data.currentScore);
 	updateScoreDisplay(data.currentScore);
-	
+
 	// Восстанавливаем активный бонус
 	activeBonuses_.clear();
 	for (const auto& timerData : data.activeBonusTimers)
 	{
 		BonusType bonusType = static_cast<BonusType>(timerData.bonusType);
 		bonusTimeOffsets_[bonusType] = timerData.timeElapsed;
-        
+
 		// Создаем новый Clock и устанавливаем его время
 		sf::Clock bonusClock;
 		activeBonuses_[bonusType] = std::move(bonusClock);
-        
-		
+
 		// Применяем эффект бонуса
 		applyBonusEffect(bonusType);
-		
 	}
 
-	
 	// Восстанавливаем кирпичи
 	bricks_.clear();
 	for (const auto& brickData : data.bricks)
@@ -814,12 +809,12 @@ void GameState::applySaveData(const GameSaveData& data)
 		// Создаём кирпич нужного типа
 		switch (brickData.brickType)
 		{
-			case 0: // Normal
+			case 0:	 // Normal
 				brick = std::make_unique<Brick>(1, true);
 				brick->setTexture(textureManager.get("brick_normal"));
 				brick->setCurrentBrickType(EBT_BrickType::EBT_Normal);
 				break;
-			case 1: // Strong
+			case 1:	 // Strong
 				brick = std::make_unique<Brick>(3, true);
 				brick->setTexture(textureManager.get("brick_strong"));
 				brick->setCurrentBrickType(EBT_BrickType::EBT_Strong);
@@ -829,7 +824,7 @@ void GameState::applySaveData(const GameSaveData& data)
 					brick->hit();
 				}
 				break;
-			case 2: // Glass
+			case 2:	 // Glass
 				brick = std::make_unique<Brick>(1, false);
 				brick->setTexture(textureManager.get("brick_glass"));
 				brick->setCurrentBrickType(EBT_BrickType::EBT_Glass);
@@ -863,11 +858,8 @@ void GameState::applySaveData(const GameSaveData& data)
 
 		brick->setPosition(brickData.position.x, brickData.position.y);
 
-		if (brickData.isDestroyed)
-		{
-			// TODO: Возможно, нужно использовать другой способ установки состояния "уничтожен"
-			 brick->SetIsDestroyed(brickData.isDestroyed); 
-		}
+		// TODO: Возможно, нужно использовать другой способ установки состояния "уничтожен"
+		brick->SetIsDestroyed(brickData.isDestroyed);
 
 		// Восстанавливаем бонус кирпича
 		if (brickData.bonusType != static_cast<int>(BonusType::None))
@@ -878,34 +870,32 @@ void GameState::applySaveData(const GameSaveData& data)
 		bricks_.push_back(std::move(brick));
 	}
 
-	
 	// Восстанавливаем активные бонусы
 	bonuses_.clear();
 	for (const auto& bonusData : data.activeBonuses)
 	{
-	    Bonus bonus;
+		Bonus bonus;
 		switch (bonusData.bonusType)
 		{
-			case 0: // BrittleBrick
+			case 0:	 // BrittleBrick
 				bonus.SetRandomBonusType(0);
 				break;
-			case 1: // FireBall
+			case 1:	 // FireBall
 				bonus.SetRandomBonusType(1);
 				break;
-			case 2: // BoostPlatformSpeed
+			case 2:	 // BoostPlatformSpeed
 				bonus.SetRandomBonusType(2);
 				break;
-			case 3: // None
+			case 3:	 // None
 				bonus.SetRandomBonusType(3);
 				break;
 			default:
-				bonus.SetRandomBonusType(3); // По умолчанию None
+				bonus.SetRandomBonusType(3);  // По умолчанию None
 				break;
-	
 		}
-	
-	    bonus.initBonus(bonusData.position, textureManager);
-	    //bonuses_.push_back(bonus);
+
+		bonus.initBonus(bonusData.position, textureManager);
+		// bonuses_.push_back(bonus);
 		bonuses_.emplace_back(bonus);
 	}
 }
