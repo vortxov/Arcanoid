@@ -45,12 +45,15 @@ void ScoreSystem::readToHighscrores()
 	{
 		std::string line;
 		while (std::getline(file, line))
-		{									   // Читаем файл построчно
-			std::stringstream ss(line);		   // Создаем строковый поток из строки
+		{										   // Читаем файл построчно
+			std::stringstream ss(line);			   // Создаем строковый поток из строки
 			int score;
 			if (ss >> score)
-			{								   // Пытаемся извлечь число из строки
-				highscores_.push_back(score);  // Добавляем число в вектор
+			{									   // Пытаемся извлечь число из строки
+				if (score != 0)
+				{
+					highscores_.push_back(score);  // Добавляем число в вектор
+				}
 			}
 			else
 			{

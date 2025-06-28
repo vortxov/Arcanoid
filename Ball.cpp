@@ -65,34 +65,32 @@ void Ball::adjustTrajectoryIfNeeded()
 	// Если было 3 или больше столкновений со стенами
 	if (wallCollisionCount_ >= 3)
 	{
-		// Проверяем, слишком ли мала вертикальная составляющая
-		float absVelY = std::abs(velocity_.y);
-		float absVelX = std::abs(velocity_.x);
+		static std::random_device rd;
+		static std::mt19937 gen(rd());
 
-		// Если вертикальная скорость меньше 40% от горизонтальной (слишком пологий угол)
-		if (absVelY < absVelX * 0.4f)
+		// Вычисляем текущий угол движения
+		float currentAngle = std::atan2(velocity_.y, velocity_.x);
+
+		// Генерируем угол коррекции в заданном диапазоне
+		std::uniform_real_distribution<float> correctionDist(MIN_CORRECTION_ANGLE, MAX_CORRECTION_ANGLE);
+		float correctionAngle = correctionDist(gen) * 3.14159f / 180.0f;
+
+		float newAngle;
+
+		if (velocity_.y < 0)  // Мяч летит вверх - подталкиваем еще больше вверх
 		{
-			// Сохраняем направления движения
-			float signX = (velocity_.x >= 0) ? 1.0f : -1.0f;
-			float signY = (velocity_.y >= 0) ? 1.0f : -1.0f;
-
-			// Увеличиваем вертикальную составляющую до минимального значения
-			float minVerticalSpeed = absVelX * 0.5f;  // 50% от горизонтальной скорости
-
-			// Сохраняем общую скорость
-			float totalSpeed = BALL_SPEED;
-
-			// Новые значения скорости
-			float newVelY = minVerticalSpeed * signY;
-			float newVelX = std::sqrt(totalSpeed * totalSpeed - newVelY * newVelY) * signX;
-
-			// Проверяем, что новые значения корректны
-			if (newVelX * newVelX + newVelY * newVelY <= totalSpeed * totalSpeed)
-			{
-				velocity_.x = newVelX;
-				velocity_.y = newVelY;
-			}
+			// Уменьшаем угол (делаем более вертикально вверх)
+			newAngle = currentAngle - correctionAngle;
 		}
+		else  // Мяч летит вниз - подталкиваем еще больше вниз
+		{
+			// Увеличиваем угол (делаем более вертикально вниз)
+			newAngle = currentAngle + correctionAngle;
+		}
+
+		// Вычисляем новые компоненты скорости
+		velocity_.x = std::cos(newAngle) * BALL_SPEED;
+		velocity_.y = std::sin(newAngle) * BALL_SPEED;
 
 		// Сбрасываем счетчик
 		wallCollisionCount_ = 0;
@@ -101,7 +99,7 @@ void Ball::adjustTrajectoryIfNeeded()
 
 sf::Vector2f Ball::getRandomBallDirection()
 {
-	return getRandomBallDirection(35.0f, 145.0f, true);
+	return getRandomBallDirection(35.0f, 145.0f, true);	 // true = может лететь вверх
 }
 
 sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool canGoUp)
@@ -129,16 +127,11 @@ sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool c
 	// Направление по вертикали
 	if (!canGoUp)
 	{
-		vy = std::abs(vy);	 // Всегда вниз (отрицательное значение)
+		vy = std::abs(vy);	// Всегда вниз (отрицательное значение)
 	}
 	else
 	{
-		// Случайное направление вверх/вниз
-		// if (std::uniform_int_distribution<int>(0, 1)(gen) == 0)
-		// {
-		// 	vy = -vy;
-		// }
-		vy = -std::abs(vy);
+		vy = -std::abs(vy);	 // Всегда вверх для старта игры
 	}
 
 	return sf::Vector2f(vx, vy);
