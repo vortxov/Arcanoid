@@ -435,7 +435,7 @@ void GameState::cancelBonusEffect(BonusType bonusType)
 		case BonusType::FireBall:
 		{
 			ball_->setTexture(textureManager.get("ball"));
-			ball_->setSpeedMultiplier(BALL_SPEED);
+			ball_->setSpeedMultiplier(1.0f);
 			break;
 		}
 		case BonusType::BrittleBrick:
