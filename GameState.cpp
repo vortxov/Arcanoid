@@ -185,7 +185,7 @@ void GameState::update(float deltaTime)
 	// AccelerationBallSpeed(deltaTime); // Not used
 	checkGameConditions();
 	updateBonus(deltaTime);
-	// TODO: Реализовать механику обновления блоков здесь
+
 	for (auto& brick : bricks_)
 	{
 		brick->updateState(textureManager);
@@ -228,25 +228,6 @@ void GameState::updateBall(float deltaTime)
 	ball_->update(deltaTime);
 	checkCollisions();
 }
-
-// Not used
-// void GameState::AccelerationBallSpeed(float deltaTime)
-// {
-// 	ballSpeedChangeTimer_ += deltaTime;
-//
-// 	if (ballSpeedChangeTimer_ >= ballSpeedChangeInterval_)
-// 	{
-// 		ballSpeedChangeTimer_ = 0.f;
-// 		currentBallSpeedMultiplier_ = std::min(maxBallSpeedMultiplier_, currentBallSpeedMultiplier_ * 1.05f);
-//
-// 		// Масштаб спрайта мяча пропорционален скорости
-// 		float ratio = (currentBallSpeedMultiplier_ - minBallSpeedMultiplier_) / (maxBallSpeedMultiplier_ - minBallSpeedMultiplier_);
-// 		float scale = 1.0f + ratio * 0.2f;
-// 		const_cast<sf::Sprite&>(ball_->getSprite()).setScale(scale, scale);
-//
-// 		ball_->setSpeedMultiplier(currentBallSpeedMultiplier_);
-// 	}
-// }
 
 void GameState::initBricks()
 {
@@ -556,6 +537,7 @@ void GameState::render()
 	window_->display();
 }
 
+// TODO: Избавиться от дублирования кода
 void GameState::showWinScreen()
 {
 	window_->clear();
@@ -571,6 +553,7 @@ void GameState::showLoseScreen()
 	window_->draw(loseText_);
 	window_->display();
 }
+// TODO END: Избавиться от дублирования кода
 
 void GameState::handleScreenInput()
 {

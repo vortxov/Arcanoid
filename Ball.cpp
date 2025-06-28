@@ -72,16 +72,26 @@ void Ball::adjustTrajectoryIfNeeded()
 		// Если вертикальная скорость меньше 40% от горизонтальной (слишком пологий угол)
 		if (absVelY < absVelX * 0.4f)
 		{
-			// Генерируем новое направление с хорошим углом
-			bool movingUp = velocity_.y < 0;
-			sf::Vector2f newDirection = getRandomBallDirection(30.0f, 60.0f, movingUp);
+			// Сохраняем направления движения
+			float signX = (velocity_.x >= 0) ? 1.0f : -1.0f;
+			float signY = (velocity_.y >= 0) ? 1.0f : -1.0f;
 
-			// Сохраняем текущую скорость
-			float currentSpeed = std::sqrt(velocity_.x * velocity_.x + velocity_.y * velocity_.y);
-			float newSpeed = std::sqrt(newDirection.x * newDirection.x + newDirection.y * newDirection.y);
+			// Увеличиваем вертикальную составляющую до минимального значения
+			float minVerticalSpeed = absVelX * 0.5f;  // 50% от горизонтальной скорости
 
-			// Масштабируем до текущей скорости
-			velocity_ = newDirection * (currentSpeed / newSpeed);
+			// Сохраняем общую скорость
+			float totalSpeed = BALL_SPEED;
+
+			// Новые значения скорости
+			float newVelY = minVerticalSpeed * signY;
+			float newVelX = std::sqrt(totalSpeed * totalSpeed - newVelY * newVelY) * signX;
+
+			// Проверяем, что новые значения корректны
+			if (newVelX * newVelX + newVelY * newVelY <= totalSpeed * totalSpeed)
+			{
+				velocity_.x = newVelX;
+				velocity_.y = newVelY;
+			}
 		}
 
 		// Сбрасываем счетчик
@@ -119,7 +129,7 @@ sf::Vector2f Ball::getRandomBallDirection(float minAngle, float maxAngle, bool c
 	// Направление по вертикали
 	if (!canGoUp)
 	{
-		vy = -std::abs(vy);	 // Всегда вниз
+		vy = -std::abs(vy);	 // Всегда вниз (отрицательное значение)
 	}
 	else
 	{
